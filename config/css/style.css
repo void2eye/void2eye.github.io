@@ -1,36 +1,19 @@
-/* 导航栏整体布局：居中菜单，搜索按钮在右边 */
-#nav {
-    display: flex;
-    justify-content: space-between;
-    /* 左右对齐，保证搜索按钮在最右边 */
-    align-items: center;
-    padding: 0 20px;
-    /* 适当的内边距 */
-}
-
-/* 中间部分的菜单居中对齐 */
-#menus {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* 搜索按钮保持在最右边 */
+/* 导航栏做居中处理 */
 #nav-right {
-    display: flex;
-    align-items: center;
+    flex: 1 1 auto;
+    justify-content: flex-end;
     margin-left: auto;
-    /* 将搜索按钮推到最右边 */
+    display: flex;
+    flex-wrap: nowrap;
+}
+/* 去除导航栏选项中底下的蓝条 */
+#nav *::after {
+    background-color: transparent !important;
 }
 
-/* 搜索按钮的悬停效果 */
-#search-button a:hover {
-    transform: scale(1.3);
-    transition: transform 0.3s ease;
-}
-
-/* 保证其他部分布局稳定 */
-#search-button a {
-    transition: transform 0.3s ease;
+/* 导航栏菜单鼠标移入字体放大 */
+#nav #site-name:hover,
+#nav .menus_item:hover,
+#nav #search-button:hover {
+    font-size: 28px;
 }
