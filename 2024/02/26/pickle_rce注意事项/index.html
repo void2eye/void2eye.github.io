@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>Pickle RCE 注意事项 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="Pickle RCE 注意事项 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/pickle_rce%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/index.html" />
+  
+  <meta property="og:image" content="/img/ye2.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/python/">python</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">Pickle RCE 注意事项</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="python命令执行的环境变量"><a href="#python命令执行的环境变量" class="headerlink" title="python命令执行的环境变量"></a>python命令执行的环境变量</h1><p><strong>内部命令与外部命令的区别</strong>：</p>
+<ul>
+<li><strong>内部命令</strong>：如 <code>dir</code>、<code>cd</code>、<code>echo</code> 等，这些命令是由 <code>cmd.exe</code>（Windows命令行解释器）直接处理的，而不需要调用独立的可执行文件。这意味着这些命令在任何时候都可以被识别和执行，而无需指定路径。</li>
+<li><strong>外部命令</strong>：如 <code>whoami</code>、<code>calc</code>，它们是独立的可执行文件，存储在 <code>C:\Windows\System32</code> 或其他目录中。为了执行这些命令，系统需要能够找到它们所在的位置。如果当前环境没有正确设置系统的 PATH 环境变量，外部命令就可能需要绝对路径来执行。</li>
+</ul>
+<p><strong>命令执行方式</strong>： 当你通过 <code>os.popen</code> 或 <code>subprocess.run</code> 调用命令时，系统会依赖于当前环境来查找命令的位置：</p>
+<ul>
+<li><strong>内部命令</strong>：<code>cmd.exe</code> 解释器会自动处理这些命令，所以你可以直接运行 <code>dir</code>，不需要指定路径。</li>
+<li><strong>外部命令</strong>：这些命令需要被操作系统查找。通常操作系统通过 PATH 环境变量查找命令的位置。如果 PATH 设置不完整或 Python 的运行环境没有正确继承 PATH 变量，则必须使用绝对路径。</li>
+</ul>
+<blockquote>
+<p>C:\Windows\System32\calc.exe</p>
+<p>C:\Windows\System32\whoami.exe</p>
+</blockquote>
+<h1 id="flask"><a href="#flask" class="headerlink" title="flask"></a>flask</h1><p>不允许动态添加路由，只能用app.view_functions[‘’]来修改路由</p>
+<p>详情见payload.py</p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/let%E5%92%8Cconst%E5%92%8Cvar/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">let、const和var</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">pickle反序列化</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

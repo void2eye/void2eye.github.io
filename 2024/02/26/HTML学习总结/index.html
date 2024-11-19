@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>HTML学习总结 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="HTML学习总结 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/HTML%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/index.html" />
+  
+  <meta property="og:image" content="/img/ye4.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/前端/">前端</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">HTML学习总结</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="标签语言毕竟不是真正的编程语言"><a href="#标签语言毕竟不是真正的编程语言" class="headerlink" title="标签语言毕竟不是真正的编程语言"></a>标签语言毕竟不是真正的编程语言</h1><p>直奔主题<br>小技巧：英文！+Tab可以在vscode一键生成html模板（当然，你需要下载对应插件并在设置打开）  </p>
+<p>本文旨在记录一些易忘记的知识点。    </p>
+<p>类选择器和id选择器</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.data</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: red;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* class=&quot;data&quot; */</span></span><br><span class="line"></span><br><span class="line"><span class="selector-id">#apply</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: red;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* id=&quot;apply&quot; */</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>字体样式和文本样式  </p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">字体类型<span class="attribute">font-family</span>，常用字体类型为serif；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">字体风格<span class="attribute">font-style</span>，常使用italic设置字体倾斜；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">字体粗细<span class="attribute">font-weight</span>，粗体可以设置为bold，粗细也可以用<span class="number">100</span>到<span class="number">900</span>的数值表示；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">字体大小<span class="attribute">font-size</span>，设置字体大小为数字，紧跟长度单位，单位常用像素px。</span><br><span class="line"><span class="comment">/*********************************************/</span></span><br><span class="line"></span><br><span class="line">文本水平对齐 <span class="attribute">text-align</span>，默认值为左对齐<span class="attribute">left</span>，常用的还有右对齐<span class="attribute">right</span>，居中对齐center；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">文本缩进<span class="attribute">text-indent</span>，用于指定文本的首行缩进，通常是将段落元素<span class="selector-tag">p</span>的首行缩进；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">文本修饰<span class="attribute">text-decoration</span>，最常用的是设置值为<span class="attribute">none</span>，来清除&lt;<span class="selector-tag">a</span>&gt;标签的默认下划线，也可以给指定元素设置下划线，上划线、删除线等效果；</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">行高<span class="attribute">line-height</span>，用于设置文本的行高，可以是数字和长度单位，比如<span class="number">32px</span>；也可以是单独数字，比如<span class="number">3</span>，表示为默认行高的<span class="number">3</span>倍。</span><br><span class="line"></span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">&gt;注意区分后代选择器和分组选择器</span><br><span class="line">&gt;<span class="number">1</span>. <span class="selector-tag">p</span> <span class="selector-tag">h3</span> &#123;&#125;</span><br><span class="line">&gt;<span class="number">2</span>. <span class="selector-tag">p</span>, <span class="selector-tag">h3</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">定义列表和表格元素  </span><br><span class="line"></span><br><span class="line">```<span class="selector-tag">html</span></span><br><span class="line">&lt;<span class="selector-tag">dl</span>&gt;</span><br><span class="line">  &lt;<span class="selector-tag">dt</span>&gt;标题&lt;/<span class="selector-tag">dt</span>&gt;</span><br><span class="line">  &lt;<span class="selector-tag">dd</span>&gt;内容<span class="number">1</span>&lt;/<span class="selector-tag">dd</span>&gt;</span><br><span class="line">  &lt;<span class="selector-tag">dd</span>&gt;内容<span class="number">2</span>&lt;/<span class="selector-tag">dd</span>&gt;</span><br><span class="line">&lt;/<span class="selector-tag">dl</span>&gt;  </span><br><span class="line"></span><br><span class="line">&lt;<span class="selector-tag">table</span>&gt;标签，定义一个表格元素；</span><br><span class="line"></span><br><span class="line">&lt;<span class="selector-tag">tr</span>&gt;标签，定义表格中的行；</span><br><span class="line"></span><br><span class="line">&lt;<span class="selector-tag">th</span>&gt;标签，定义表格中的表头单元格；</span><br><span class="line"></span><br><span class="line">&lt;<span class="selector-tag">td</span>&gt;标签，定义普通的表格单元格。</span><br><span class="line">&lt;!-- 注意样式里设置表格边框是为<span class="selector-tag">table</span>, <span class="selector-tag">th</span>, <span class="selector-tag">td</span> &#123;&#125;  --&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">table</span>, <span class="selector-tag">th</span>, <span class="selector-tag">td</span> &#123;</span><br><span class="line">  <span class="attribute">border-style</span>: solid;<span class="comment">/* 边框样式 */</span></span><br><span class="line">  <span class="attribute">border-collapse</span>: collapse;<span class="comment">/* 边框距 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>合并单元格（表格）</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">td</span> <span class="attr">rowspan</span>=<span class="string">&quot;2&quot;</span>&gt;</span>111<span class="tag">&lt;/<span class="name">td</span>&gt;</span><span class="comment">&lt;!-- 行 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">td</span> <span class="attr">colspan</span>=<span class="string">&quot;2&quot;</span>&gt;</span>111<span class="tag">&lt;/<span class="name">td</span>&gt;</span><span class="comment">&lt;!-- 列 --&gt;</span></span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">表单元素  </span><br><span class="line">```html</span><br><span class="line"><span class="tag">&lt;<span class="name">form</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;text&quot;</span> <span class="attr">name</span>=<span class="string">&quot;email&quot;</span> <span class="attr">placeholder</span>=<span class="string">&quot;邮箱&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;提交&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 单选按钮 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;radio&quot;</span> <span class="attr">name</span>=<span class="string">&quot;第一组&quot;</span> <span class="attr">id</span>=<span class="string">&quot;a&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">&quot;a&quot;</span>&gt;</span>111<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- 同一组单选按钮的name属性的值必须相同。</span></span><br><span class="line"><span class="comment">   保证&lt;label&gt;标签（按钮的文本描述标签）中的for属性值和对应的&lt;input&gt;中的id属性值一样。--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 复选按钮 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;checkbox&quot;</span> <span class="attr">name</span>=<span class="string">&quot;第二组&quot;</span> <span class="attr">id</span>=<span class="string">&quot;a&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">&quot;a&quot;</span>&gt;</span>111<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;checkbox&quot;</span> <span class="attr">name</span>=<span class="string">&quot;第二组&quot;</span> <span class="attr">id</span>=<span class="string">&quot;b&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">&quot;b&quot;</span>&gt;</span>222<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 下拉菜单 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">&quot;type&quot;</span>&gt;</span>菜单的描述<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">select</span> <span class="attr">name</span>=<span class="string">&quot;shop_type&quot;</span> <span class="attr">id</span>=<span class="string">&quot;type&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>1<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>2<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>3<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br><span class="line">  </span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>伪类：状态为类+结构为类+伪元素  </p>
+<pre><code class="css">/* 状态 */
+:link 未访问状态
+:visited 已访问状态
+:hover 鼠标悬停状态
+:active 点击状态
+:focus 获得焦点元素
+
+/* 结构 */
+:first-child 第一个元素
+:last-child 最后一个元
+:nth-child(n) 匹配第n个元素
+
+/* 伪元素 */
+概念： 创建了新元素，并通过新元素来添加样式。
+
+插入图片：无需引号，比如content: url(图像的链接);
+
+插入文本：需要引号，比如content: &quot;文本内容&quot;;
+
+注意，::before和::after伪元素必须有content属性，
+
+没有需要插入的内容时可以设置为空，即content: &quot;&quot;;
+</code></pre>
+<p>盒子的概念: 边框 圆角 内容区 内边距 外边距  </p>
+<p><img src="/img/html1.png" alt="1"><br><img src="/img/html2.png" alt="1"><br><img src="/img/html3.png" alt="1"><br>（1）用width属性可以指定内容区的宽度</p>
+<p>（2）用height属性可以指定内容区的高度（但是在实际开发中，一般不会手动指定固定高度）</p>
+<p>width与height 对行内、非替换元素无效。  </p>
+<p><img src="/img/html4.png" alt="1"><br><img src="/img/html5.png" alt="1"></p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/06/12/javascript/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">js原型链污染</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/FFI/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">FFI真解</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

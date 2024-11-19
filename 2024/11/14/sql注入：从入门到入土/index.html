@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>sql注入：从入门到入土 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="sql注入：从入门到入土 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/11/14/sql%E6%B3%A8%E5%85%A5%EF%BC%9A%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F/index.html" />
+  
+  <meta property="og:image" content="/img/ye2.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-11-14T12:38:24.569Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/sql/">sql</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>November</span>
+            <span>14,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">sql注入：从入门到入土</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <p>（全文以MySQL为例）</p>
+<h1 id="一-联合注入"><a href="#一-联合注入" class="headerlink" title="一.联合注入"></a>一.联合注入</h1><h2 id="1-简单原理"><a href="#1-简单原理" class="headerlink" title="1. 简单原理"></a>1. 简单原理</h2><p>在sql的查询语句中，union，是一个极度危险的函数。<br>其会将后面的语句作为sql命令执行，拼接到前面正常的结果集后。<br>例子：  </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> usr <span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+</span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> name  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span> admin <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">2</span> <span class="operator">|</span> text1 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">3</span> <span class="operator">|</span> lisi  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">4</span> <span class="operator">|</span> gest  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span> <span class="number">2</span>     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+</span></span><br></pre></td></tr></table></figure>
+<p>1,2表头被拼接起来（这里的1，2实际上不存在）<br>那么加上恶意的查询  </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> usr <span class="keyword">union</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> home;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+</span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> name                <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span> admin               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">2</span> <span class="operator">|</span> text1               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">3</span> <span class="operator">|</span> lisi                <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">4</span> <span class="operator">|</span> gest                <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span> flag&#123;ye <span class="keyword">is</span> watch u&#125; <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+</span></span><br></pre></td></tr></table></figure>
+<p>很明显，命令被执行了。<br>当然这只是理想情况，在实际的开发环境中我们几乎不可能知道这个<font color="yellow">表有几行几列，这个表叫什么，查询语句的格式等等……</font>  </p>
+<blockquote>
+<p>而正因为如此，其为我们进行漏洞注入提供了思路。</p>
+</blockquote>
+<h2 id="2-联合注入的步骤"><a href="#2-联合注入的步骤" class="headerlink" title="2. 联合注入的步骤"></a>2. 联合注入的步骤</h2><blockquote>
+<ol>
+<li>判断数据类型</li>
+<li>查列数</li>
+<li>却定字段的位置</li>
+<li>查表名</li>
+<li>查列名</li>
+<li>获取数据</li>
+</ol>
+</blockquote>
+<p>先根据以下语句的变化进行一个简单的理解：  </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span>$id</span><br><span class="line"><span class="comment">-- 一般情况下，查询语句的where条件里对于列或表的表述的参数都是变量，一般是接受用户的get或post请求</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 而对于该变量的格式又有多种：</span></span><br><span class="line"> id<span class="operator">=</span>&quot;$id&quot;</span><br><span class="line"> id<span class="operator">=</span>(&quot;$id&quot;)</span><br><span class="line"> id<span class="operator">=</span><span class="string">&#x27;1&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>我们拿id&#x3D;’1’来举例子</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="string">&#x27;1&#x27;</span>;</span><br><span class="line"><span class="comment">-- 1是客户端post传值给ssqqll的值</span></span><br><span class="line"><span class="comment">-- 如果： ssqqll = 1 union select 1,2 from home;</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="string">&#x27;1 union select 1,2 from home;&#x27;</span>;</span><br><span class="line"><span class="comment">-- 由于php弱比较，会先将不同类型的给是转化成相同，像此处，php会将字符串逐一遍历来得到数字，得到1，所以注入失效了。</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 但是要是我传参  ssqqll = 1&#x27; union select 1,2 from home;#（这里的#要url编码为%23，否则则会表示特殊锚点）</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> users <span class="keyword">where</span> id<span class="operator">=</span><span class="string">&#x27;1&#x27;</span> <span class="keyword">union</span> <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span> <span class="keyword">from</span> home;#<span class="string">&#x27;;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">+------+---------------------+</span></span><br><span class="line"><span class="string">| id   | name                |</span></span><br><span class="line"><span class="string">+------+---------------------+</span></span><br><span class="line"><span class="string">|    1 | admin               |</span></span><br><span class="line"><span class="string">|    2 | text1               |</span></span><br><span class="line"><span class="string">|    3 | lisi                |</span></span><br><span class="line"><span class="string">|    4 | gest                |</span></span><br><span class="line"><span class="string">|    1 | flag&#123;ye is watch u&#125; |</span></span><br><span class="line"><span class="string">+------+---------------------+</span></span><br></pre></td></tr></table></figure>
+<p>最后，前方的‘1’闭合完成语句，后方把不符合语法的多余部分注释掉，完成联合注入  </p>
+<p>ok，我们回到正题，首先第一步：</p>
+<blockquote>
+<p>判断数据类型，其实就是通过测试包错来试出他的包裹结构</p>
+</blockquote>
+<p>还记得上面的例子吗，包裹一共最基本也就4种形态<br>不外乎(1), ‘1’ ,”1” ,1  。</p>
+<blockquote>
+<p>当然这些都是可以<font color="red">相互嵌套的，能整出很多花样</font></p>
+</blockquote>
+<p>一个例子，抑或是一个思路</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 当我们传参？id=1时，有</span></span><br><span class="line">MYSql Test</span><br><span class="line">ID	Username</span><br><span class="line"><span class="number">1</span>	admin</span><br><span class="line"></span><br><span class="line"><span class="comment">-- ?id=1&#x27;</span></span><br><span class="line">无法取得数据: You have an error <span class="keyword">in</span> your <span class="keyword">SQL</span> syntax; <span class="keyword">check</span> the manual that corresponds <span class="keyword">to</span> your MySQL server version <span class="keyword">for</span> the <span class="keyword">right</span> syntax <span class="keyword">to</span> use near <span class="string">&#x27;&#x27;</span><span class="number">1</span><span class="string">&#x27;&#x27;&#x27; at line 1  </span></span><br><span class="line"><span class="string"></span></span><br></pre></td></tr></table></figure>
+<p>好，重点来了，根据报错信息，是出现了’1’’,所以断定为’1’包裹。  </p>
+<blockquote>
+<p>当然，有的情况是报错不会给出这么详细或是干脆没有报错。并不碍事，照着刚才的思路，先根据四种基本包裹一步一步慢慢排除</p>
+</blockquote>
+<p>这里给一个模板，以后做手注盘判断时可以直接拿来用  </p>
+<blockquote>
+<ol>
+<li>select * from users where id&#x3D; 1 </li>
+<li>select * from users where id&#x3D;’1’ </li>
+<li>select * from users where id&#x3D;(‘1’)</li>
+<li>select * from users where id&#x3D;”‘1’”</li>
+<li>select * from users where id&#x3D;(1)</li>
+<li>select * from users where id&#x3D;((‘1’))</li>
+<li>select * from users where id&#x3D;(“‘1’”) </li>
+<li>select * from users where id&#x3D;”1”</li>
+</ol>
+</blockquote>
+<p>慢慢试，排除哪个就注释哪个（后面我们学到sqlmap时就不用这么麻烦了，这么做更多的是锻炼思维）</p>
+<h1 id="二"><a href="#二" class="headerlink" title="二."></a>二.</h1><h2 id="1"><a href="#1" class="headerlink" title="1."></a>1.</h2><h2 id="2"><a href="#2" class="headerlink" title="2."></a>2.</h2><h2 id="3"><a href="#3" class="headerlink" title="3."></a>3.</h2><h1 id="三"><a href="#三" class="headerlink" title="三."></a>三.</h1><h2 id="1-1"><a href="#1-1" class="headerlink" title="1."></a>1.</h2><h2 id="2-1"><a href="#2-1" class="headerlink" title="2."></a>2.</h2><h2 id="3-1"><a href="#3-1" class="headerlink" title="3."></a>3.</h2><h1 id="四"><a href="#四" class="headerlink" title="四."></a>四.</h1><h2 id="1-2"><a href="#1-2" class="headerlink" title="1."></a>1.</h2><h2 id="2-2"><a href="#2-2" class="headerlink" title="2."></a>2.</h2><h2 id="3-2"><a href="#3-2" class="headerlink" title="3."></a>3.</h2><h1 id="五"><a href="#五" class="headerlink" title="五."></a>五.</h1><h2 id="1-3"><a href="#1-3" class="headerlink" title="1."></a>1.</h2><h2 id="2-3"><a href="#2-3" class="headerlink" title="2."></a>2.</h2><h2 id="3-3"><a href="#3-3" class="headerlink" title="3."></a>3.</h2>
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/11/14/ssrf%E5%AD%A6%E4%B9%A0/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">ssrf学习</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/11/14/nodejs%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">nodejs沙箱逃逸</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

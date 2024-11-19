@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>Phar反序列化漏洞详解 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="Phar反序列化漏洞详解 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/Phar%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/index.html" />
+  
+  <meta property="og:image" content="/img/DS.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/PHP/">PHP</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">Phar反序列化漏洞详解</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="PHAR漏洞详解"><a href="#PHAR漏洞详解" class="headerlink" title="PHAR漏洞详解"></a>PHAR漏洞详解</h1><p><strong>PHAR（PHP Archive）文件格式</strong> 是PHP内置的归档文件格式，类似于<code>ZIP</code>、<code>TAR</code>等，它可以将多个文件打包成一个文件进行处理。PHAR文件的设计目的是为了简化分发和使用PHP程序。然而，由于PHAR文件包含了序列化数据，它也容易受到和PHP反序列化相关的漏洞攻击，例如<strong>反序列化漏洞</strong>和<strong>文件包含漏洞</strong>。</p>
+<p>PHAR漏洞一般涉及到<strong>反序列化攻击</strong>和<strong>文件包含</strong>漏洞的结合，具体表现为<strong>通过文件包含函数读取PHAR文件中的序列化数据，从而引发反序列化攻击</strong>。</p>
+<h3 id="PHAR文件的工作原理"><a href="#PHAR文件的工作原理" class="headerlink" title="PHAR文件的工作原理"></a>PHAR文件的工作原理</h3><p>PHAR文件内部由多个部分组成，包括文件内容和元数据。PHAR的元数据部分是一个可被序列化的PHP对象。因此，PHAR文件本质上包含了一个序列化的PHP对象，当这个PHAR文件被读取或操作时，PHP会<code>自动</code>将元数据反序列化。</p>
+<blockquote>
+<p>意味着：<strong>该方法在 文件系统函数 （ file_get_contents 、 unlink 等）参数可控的情况下，配合 phar:&#x2F;&#x2F;伪协议 ，可以不依赖反序列化函数 unserialize() 直接进行反序列化的操作</strong>。</p>
+</blockquote>
+<h1 id="PHAR-文件的大体结构可以分为-4-个部分："><a href="#PHAR-文件的大体结构可以分为-4-个部分：" class="headerlink" title="PHAR 文件的大体结构可以分为 4 个部分："></a>PHAR 文件的大体结构可以分为 4 个部分：</h1><hr>
+<h3 id="1-Stub（文件标识）"><a href="#1-Stub（文件标识）" class="headerlink" title="1. Stub（文件标识）"></a>1. <strong>Stub（文件标识）</strong></h3><p><code>Stub</code> 是 PHAR 文件的标志，用来表明该文件是一个 PHAR 文件。这个部分通常是 PHP 代码，并且以 <code>__HALT_COMPILER();</code> 结尾，表示停止 PHP 编译器的进一步执行。任何位于 <code>__HALT_COMPILER()</code> 之后的二进制数据都不会被当作 PHP 代码执行。</p>
+<h4 id="典型的-Stub-代码："><a href="#典型的-Stub-代码：" class="headerlink" title="典型的 Stub 代码："></a>典型的 <code>Stub</code> 代码：</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title class_">Phar</span>::<span class="title function_ invoke__">mapPhar</span>();</span><br><span class="line"><span class="keyword">include</span> <span class="string">&#x27;phar://phar.phar/index.php&#x27;</span>;</span><br><span class="line"><span class="title function_ invoke__">__HALT_COMPILER</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>该部分表示 PHAR 文件的“入口”，<code>Phar::mapPhar()</code> 用来加载 PHAR 文件，并使用 <code>include</code> 引入其中的文件。</li>
+<li><strong>绕过上传限制</strong>：由于 <code>Stub</code> 部分可以是任意 PHP 代码，只要最后以 <code>__HALT_COMPILER();</code> 结束，因此攻击者可以构造一个带有这个标志的文件（例如伪造为图片格式），从而绕过文件上传限制（例如上传过滤器只允许图片文件）。只要文件中包含合法的 <code>Stub</code> 结尾，PHP 解释器就会将它识别为 PHAR 文件。</li>
+</ul>
+<hr>
+<h3 id="2-Manifest（文件内容的描述）"><a href="#2-Manifest（文件内容的描述）" class="headerlink" title="2. Manifest（文件内容的描述）"></a>2. <strong>Manifest（文件内容的描述）</strong></h3><p><code>Manifest</code> 是 PHAR 文件的核心元数据部分，它描述了 PHAR 文件内部包含的所有文件的信息。这包括：</p>
+<ul>
+<li>每个文件的名称、大小、时间戳、文件权限、校验和等属性。</li>
+<li>还包括序列化的用户自定义 <code>meta-data</code>，这是 PHAR 漏洞利用的关键部分。</li>
+</ul>
+<h4 id="Manifest-中的内容："><a href="#Manifest-中的内容：" class="headerlink" title="Manifest 中的内容："></a>Manifest 中的内容：</h4><ul>
+<li><strong>文件信息</strong>：每个文件的信息，包括文件名、压缩方式、文件大小等属性都会记录在 <code>Manifest</code> 部分。</li>
+<li><strong>元数据（Meta-data）</strong>：这一部分是存储用户自定义的序列化数据，也就是攻击者可以利用的部分。如果攻击者可以通过某种方式注入恶意的 PHP 对象到这个元数据中，当 PHAR 文件被加载时，这些恶意对象会被反序列化并执行攻击代码。</li>
+</ul>
+<p><strong>序列化对象漏洞的利用点</strong>： PHAR 文件可以包含序列化的 PHP 对象。如果一个应用程序存在文件包含漏洞（例如本地文件包含，LFI），并且通过 <code>phar://</code> 协议来加载文件时，PHP 会自动反序列化这些元数据中的对象。如果这些对象包含恶意代码（例如有不安全的 <code>__destruct()</code> 或 <code>__wakeup()</code> 方法），就会触发远程代码执行。</p>
+<hr>
+<h3 id="3-文件内容（File-Contents）"><a href="#3-文件内容（File-Contents）" class="headerlink" title="3. 文件内容（File Contents）"></a>3. <strong>文件内容（File Contents）</strong></h3><p>这一部分是 PHAR 文件实际存储的文件数据。被压缩的文件会被分配到 <code>Manifest</code> 中定义的位置，并且可以通过 <code>phar://</code> 协议进行访问。</p>
+<ul>
+<li><p>例如，如果 PHAR 文件中有一个名为 <code>index.php</code> 的文件，应用程序可以使用以下方式访问它：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">include</span> <span class="string">&#x27;phar://example.phar/index.php&#x27;</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>文件内容可以是 PHP 文件、图片、文本文件等任意格式。</p>
+</li>
+</ul>
+<hr>
+<h3 id="4-可选的签名（Signature）"><a href="#4-可选的签名（Signature）" class="headerlink" title="4. 可选的签名（Signature）"></a>4. <strong>可选的签名（Signature）</strong></h3><p>签名是 PHAR 文件的完整性校验部分，通常位于文件末尾。签名用于验证 PHAR 文件在分发过程中是否被篡改。PHAR 文件的签名支持多种算法，包括：</p>
+<ul>
+<li>SHA-1</li>
+<li>SHA-256</li>
+<li>SHA-512</li>
+<li>MD5</li>
+</ul>
+<h4 id="签名的作用："><a href="#签名的作用：" class="headerlink" title="签名的作用："></a>签名的作用：</h4><ul>
+<li><strong>验证完整性</strong>：签名保证了 PHAR 文件未被篡改。如果签名不正确，PHAR 文件可能会被拒绝加载（取决于 PHP 配置）。</li>
+<li><strong>签名机制</strong>是可选的，某些情况下签名可能被禁用或忽略。</li>
+</ul>
+<blockquote>
+<p>注意：要将php.ini中的phar.readonly选项设置为Off，否则无法生成phar文件。</p>
+</blockquote>
+<h1 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h1><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @<span class="title function_ invoke__">unlink</span>(<span class="string">&quot;phar.phar&quot;</span>);</span><br><span class="line">    <span class="variable">$phar</span> = <span class="keyword">new</span> <span class="title class_">Phar</span>(<span class="string">&quot;phar.phar&quot;</span>); <span class="comment">//后缀名必须为phar</span></span><br><span class="line">    <span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">startBuffering</span>();</span><br><span class="line">    <span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">setStub</span>(<span class="string">&quot;&lt;?php __HALT_COMPILER(); ?&gt;&quot;</span>); <span class="comment">//设置stub</span></span><br><span class="line">    <span class="variable">$o</span> = <span class="keyword">new</span> <span class="title class_">TestObject</span>();</span><br><span class="line">    <span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">setMetadata</span>(<span class="variable">$o</span>); <span class="comment">//将自定义的meta-data存入manifest</span></span><br><span class="line">    <span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">addFromString</span>(<span class="string">&quot;test.txt&quot;</span>, <span class="string">&quot;test&quot;</span>); <span class="comment">//添加要压缩的文件,这里向 PHAR 文件中添加了一个名为 test.txt 的文件，文件内容为 &quot;test&quot;。这一步模拟了在 PHAR 文件中打包文件的过程。通常情况下，PHAR 文件可以包含任意格式的文件（如 PHP 文件、文本文件等）。</span></span><br><span class="line">    <span class="comment">//签名自动计算</span></span><br><span class="line">    <span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">stopBuffering</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20241019233515855.png" alt="image-20241019233515855"></p>
+<h1 id="伪造文件头"><a href="#伪造文件头" class="headerlink" title="伪造文件头"></a>伪造文件头</h1><p>可以 phar 文件必须以<code>__HALT_COMPILER();?&gt;</code>来结尾，那么我们就可以通过添加任意的文件头+修改后缀名的方式将phar文件伪装成其他格式的文件。因此假设这里我们构造一个带有图片文件头部的 phar 文件。</p>
+<p>例子</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line">@<span class="title function_ invoke__">unlink</span>(<span class="string">&#x27;demo_jpg.phar&#x27;</span>);</span><br><span class="line"><span class="variable">$phar</span> = <span class="keyword">new</span> <span class="title class_">Phar</span>(<span class="string">&#x27;demo_jpg.phar&#x27;</span>);</span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">startBuffering</span>();</span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">setStub</span>(<span class="string">&quot;GIF89a&quot;</span>.<span class="string">&quot;&lt;?php __HALT_COMPILER(); ?&gt;&quot;</span>); <span class="comment">//设置stub</span></span><br><span class="line"><span class="variable">$d</span> = <span class="keyword">new</span> <span class="title class_">Demo</span>();</span><br><span class="line"><span class="variable">$d</span>-&gt;data=<span class="string">&#x27;haaaaa&#x27;</span>;</span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">setMetadata</span>(<span class="variable">$d</span>); </span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">addFromString</span>(<span class="string">&quot;test.txt&quot;</span>, <span class="string">&quot;test&quot;</span>);</span><br><span class="line"><span class="variable">$phar</span>-&gt;<span class="title function_ invoke__">stopBuffering</span>();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include</span>(<span class="string">&#x27;phar://demp.phar&#x27;</span>);</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">_destruct</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable language_">$this</span>-&gt;data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>注意要同版本</p>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20241020000113300.png" alt="image-20241020000113300"></p>
+<p>如果题目限制了，<code>phar://</code>不能出现在头几个字符。可以用<code>Bzip / Gzip</code>协议绕过。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$filename</span> = <span class="string">&#x27;compress.zlib://phar://phar.phar/test.txt&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>虽然会警告但仍会执行，它同样适用于<code>compress.bzip2://</code>。<br>当文件系统函数的参数可控时，我们可以在不调用<code>unserialize()</code>的情况下进行反序列化操作，极大的拓展了反序列化攻击面。</p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/RMI/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">RMI</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/let%E5%92%8Cconst%E5%92%8Cvar/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">let、const和var</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

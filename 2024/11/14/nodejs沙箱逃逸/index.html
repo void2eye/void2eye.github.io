@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>nodejs沙箱逃逸 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="nodejs沙箱逃逸 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/11/14/nodejs%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/index.html" />
+  
+  <meta property="og:image" content="/img/ye3.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-11-14T12:38:24.552Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/Nodejs/">Nodejs</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>November</span>
+            <span>14,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">nodejs沙箱逃逸</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="关于沙箱与nodejs-vm-vm2"><a href="#关于沙箱与nodejs-vm-vm2" class="headerlink" title="关于沙箱与nodejs vm&#x2F;vm2"></a>关于沙箱与nodejs vm&#x2F;vm2</h1><h2 id="什么是沙箱"><a href="#什么是沙箱" class="headerlink" title="什么是沙箱"></a>什么是沙箱</h2><p>我的世界是一款现象级沙盒类游戏，玩家可以在自己的世界随意创造，用自己的想象力搭建一个<b>虚拟的</b>，完全<b>与外界隔离</b>的世界。  </p>
+<p>显而易见，沙箱sandbox就是一种虚拟隔离的安全机制，其中的应用与代码能够和外界全局变量隔绝（理想情况）。  </p>
+<p>常见的例子就是docker和虚拟机VM。  </p>
+<p>沙箱用到了三种技术：虚拟化技术访问控制技术和躲避技术。<br>这里着重讲一下虚拟化技术。</p>
+<blockquote>
+<p>虚拟化技术（Virtualization）是一种资源管理技术。通过虚拟化，计算机的很多实体资源，包括CPU、内存、磁盘空间等，都会被抽象化后成为可供分割和重新组合的状态，让用户可以自己重新分配电脑硬件资源。如图所示，在沙箱中会使用虚拟化技术为不可信的资源构建封闭的运行环境，在保证不可信资源功能正常运行的同时提供安全防护。简而言之，即是沙箱中被隔离的可疑或待测程序会使用沙箱中的资源运行，以保证沙箱外资源的安全，不影响沙箱外其他程序的运行。  </p>
+</blockquote>
+<p><img src="/img/vm1.png" alt="虚拟化技术">  </p>
+<p>关于沙箱的一些特点  </p>
+<p>沙箱根据虚拟化层次的不同，分为系统级别和容器级别。前者有一整套虚拟的操作系统，是一个完整的计算机软件架构，而后者则是部署在应用周围的一个容器（container）。沙箱的重点在于安全测试，即其跟其他通常意义上的容器有所不同，侧重点在于不让沙箱内部影响沙箱外部。  </p>
+<blockquote>
+<p>沙箱在部署上还分为硬件沙箱和云沙箱</p>
+</blockquote>
+<h2 id="nodejs-vn-vm2"><a href="#nodejs-vn-vm2" class="headerlink" title="nodejs vn&#x2F;vm2"></a>nodejs vn&#x2F;vm2</h2><h3 id="关于nodejs的作用域和几个API"><a href="#关于nodejs的作用域和几个API" class="headerlink" title="关于nodejs的作用域和几个API"></a>关于nodejs的作用域和几个API</h3><p>作用域</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#<span class="number">1.</span>js</span><br><span class="line"><span class="keyword">var</span> height1 = <span class="number">175</span></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">height</span> = height1</span><br><span class="line"></span><br><span class="line">#<span class="number">2.</span>js</span><br><span class="line"><span class="keyword">const</span> age = <span class="number">20</span></span><br><span class="line"><span class="keyword">const</span> user = <span class="built_in">require</span>(<span class="string">&quot;./1&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(age)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(user.<span class="property">height</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//20</span></span><br><span class="line"><span class="comment">//175</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>height的作用域是1.js，age的作用域是2.js。但是exports是一个能将js文件中元素输出的接口，故在2.js中，常量user通过require方法得到1.js里的所有元素。  </p>
+<p>（是不是很像python的库概念）  </p>
+<p>同时，在这连个js文件之上还有一个global全局作用域，nodejs全部的包和属性都挂载在global这个对象下。跟py里import*一个道理，可以直接访问。  </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># <span class="number">1.</span>js</span><br><span class="line"><span class="keyword">var</span> height1 = <span class="number">175</span></span><br><span class="line"><span class="variable language_">global</span>.<span class="property">name</span> = <span class="string">&quot;ThnPkm&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">height</span> = height1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># <span class="number">2.</span>js</span><br><span class="line"><span class="keyword">const</span> age = <span class="number">20</span></span><br><span class="line"><span class="keyword">const</span> user = <span class="built_in">require</span>(<span class="string">&quot;./1&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(age)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(user.<span class="property">height</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(name)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="关于vm-vm2沙箱"><a href="#关于vm-vm2沙箱" class="headerlink" title="关于vm&#x2F;vm2沙箱"></a>关于vm&#x2F;vm2沙箱</h3><p>即船舰一个新的作用域去执行我们想要测试的代码，在nodejs中，作用域又称为上下文</p>
+<p>在介绍几个vm的api前，先科普一下api的概念<br><strong>API</strong>（即<strong>应用程序编程接口</strong>）是一组定义的规则，使不同的应用程序能够相互通信。它充当处理系统之间数据传输的中间层，使公司能够向外部第三方开发人员、业务合作伙伴和公司内部部门开放其应用程序数据和功能²³。</p>
+<p>具体来说，API有以下几个关键点：</p>
+<ol>
+<li><strong>程序之间的接口</strong>：API允许不同的应用程序、服务或系统之间共享信息和功能，以约定好的接口实现互联互通。</li>
+<li><strong>形式多样</strong>：API<font color="red">不仅仅是函数，还可以是类、HTTP网络请求等形式。</font></li>
+<li><strong>网络请求为基础</strong>：现代互联网中，以网络请求为基础的API是最常见的形式。这些API允许不同公司之间通过网络进行数据交换，比如调用滴滴的打车服务、获取天气数据等。</li>
+</ol>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/144399137">https://zhuanlan.zhihu.com/p/144399137</a>.<br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/21430743">https://www.zhihu.com/question/21430743</a>.<br><a target="_blank" rel="noopener" href="http://www.didi.com/taxi">http://www.didi.com/taxi</a>.  </p>
+</blockquote>
+<h4 id="vm-runinThisContext-code"><a href="#vm-runinThisContext-code" class="headerlink" title="vm.runinThisContext(code)"></a>vm.runinThisContext(code)</h4><p>在当前global下创建一个作用域（sandbox），并将接收到的参数当作代码运行。sandbox中可以访问到global中的属性，但无法访问其他包中的属性。  </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># xxx.<span class="property">js</span></span><br><span class="line"><span class="keyword">const</span> vm = <span class="built_in">require</span>(<span class="string">&#x27;vm&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> local_var = <span class="string">&quot;local&quot;</span>;</span><br><span class="line"><span class="keyword">const</span> vm_var = vm.<span class="title function_">runInThisContext</span>(<span class="string">&#x27;local_var = &quot;vm&quot;;&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(vm_var); <span class="comment">//vm</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(local_var); <span class="comment">//local</span></span><br><span class="line"><span class="comment">//local_var 的值没变，即这个runAPI接口无法访问本地作用域</span></span><br></pre></td></tr></table></figure>
+<p>换句话说，这个沙箱成功隔离了，沙箱内对于变量的操作没有污染到挂载到全局变量的变量。  </p>
+<h4 id="vm-createContext-sandbox-："><a href="#vm-createContext-sandbox-：" class="headerlink" title="vm.createContext([sandbox])："></a>vm.createContext([sandbox])：</h4><p>在使用前需要先创建一个沙箱对象，再将沙箱对象传给该方法（如果没有则会生成一个空的沙箱对象），v8为这个沙箱对象在当前global外再创建一个作用域，此时这个沙箱对象就是这个作用域的全局对象，沙箱内部无法访问global中的属性。  </p>
+<p><img src="/img/vm3.png" alt="vm3"></p>
+<h4 id="vm-runInContext-code-contextifiedSandbox-options"><a href="#vm-runInContext-code-contextifiedSandbox-options" class="headerlink" title="vm.runInContext(code, contextifiedSandbox[, options])"></a>vm.runInContext(code, contextifiedSandbox[, options])</h4><p>配合creatcontext使用</p>
+<p>参数为要执行的代码和创建完作用域的沙箱对象，代码会在传入的沙箱对象的上下文中执行，并且参数的值与沙箱内的参数值相同。  </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> vm = <span class="built_in">require</span>(<span class="string">&#x27;vm&#x27;</span>);</span><br><span class="line"><span class="variable language_">global</span>.<span class="property">global_var</span> = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">const</span> sandbox = &#123; <span class="attr">global_var</span>: <span class="number">2</span> &#125;;</span><br><span class="line">vm.<span class="title function_">createContext</span>(sandbox);  <span class="comment">// 创建一个上下文隔离对象</span></span><br><span class="line">vm.<span class="title function_">runInContext</span>(<span class="string">&#x27;global_var *=2;&#x27;</span>, sandbox);</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(sandbox); <span class="comment">//&#123; global_var: 4 &#125;</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(global_var); <span class="comment">//1</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里，上下文中的globalVar在输出中为(2*2 &#x3D; 4)，但是globalVar的值仍为1，沙箱内部无法访问global中的属性。 </p>
+<h4 id="vm-runInNewContext-code-sandbox-options"><a href="#vm-runInNewContext-code-sandbox-options" class="headerlink" title="vm.runInNewContext(code[, sandbox][, options])"></a>vm.runInNewContext(code[, sandbox][, options])</h4><p>creatContext和runInContext的结合版，传入要执行的代码和沙箱对象。  </p>
+<h4 id="vm-Script类"><a href="#vm-Script类" class="headerlink" title="vm.Script类"></a>vm.Script类</h4><p>vm.Script类型的实例包含若干预编译的脚本，这些脚本能够在特定的沙箱（或者上下文）中被运行。  </p>
+<h4 id="new-vm-Script-code-options"><a href="#new-vm-Script-code-options" class="headerlink" title="new vm.Script(code, options)"></a>new vm.Script(code, options)</h4><p>创建一个新的vm.Script对象只编译代码但不会执行它。编译过的vm.Script此后可以被多次执行。值得注意的是，code是不绑定于任何全局对象的，相反，它仅仅绑定于每次执行它的对象。<br>code：要被解析的JavaScript代码  </p>
+<pre><code class="js">const vm = require(&#39;vm&#39;);
+const sandbox = &#123; animal: &#39;cat&#39;, count: 1 &#125;;
+const script = new vm.Script(&#39;count +=1; name = &quot;Tom&quot;;&#39;);  //编译code
+const context = vm.createContext(sandbox);  // 创建一个上下文隔离对象
+script.runInContext(context);   // 在指定的下文里执行code并返回其结果
+
+console.log(sandbox); //&#123; animal: &#39;cat&#39;, count: 2, name: &#39;Tom&#39; &#125;
+</code></pre>
+<p>script对象可以通过runInContext运行</p>
+<p>vm中最关键的就是 上下文context ，vm能逃逸出来的原理也就是因为 context 并没有拦截针对外部的 constructor 和 __proto__等属性 的访问  </p>
+<h3 id="沙箱逃逸"><a href="#沙箱逃逸" class="headerlink" title="沙箱逃逸"></a>沙箱逃逸</h3><p>参考文章:<br><a target="_blank" rel="noopener" href="https://info.support.huawei.com/info-finder/encyclopedia/zh/%E6%B2%99%E7%AE%B1%E6%8A%80%E6%9C%AF.html">https://info.support.huawei.com/info-finder/encyclopedia/zh/%E6%B2%99%E7%AE%B1%E6%8A%80%E6%9C%AF.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_61768489/article/details/130138439">https://blog.csdn.net/qq_61768489/article/details/130138439</a><br><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/207283">https://www.anquanke.com/post/id/207283</a></p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/11/14/sql%E6%B3%A8%E5%85%A5%EF%BC%9A%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%85%A5%E5%9C%9F/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">sql注入：从入门到入土</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/06/12/javascript/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">js原型链污染</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

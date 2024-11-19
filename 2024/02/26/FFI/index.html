@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>FFI真解 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="FFI真解 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/FFI/index.html" />
+  
+  <meta property="og:image" content="/img/ye10.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/PHP/">PHP</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">FFI真解</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="PHP-FFI真解"><a href="#PHP-FFI真解" class="headerlink" title="PHP FFI真解"></a>PHP FFI真解</h1><h2 id="PHP的扩展方式"><a href="#PHP的扩展方式" class="headerlink" title="PHP的扩展方式"></a>PHP的扩展方式</h2><h3 id="传统扩展"><a href="#传统扩展" class="headerlink" title="传统扩展"></a>传统扩展</h3><p><code>PHP 传统扩展</code>是通过 <strong>C 语言</strong> 编写的，用于扩展 PHP 功能的动态链接库（如 <code>.so</code> 或 <code>.dll</code> 文件）。这些扩展允许 PHP 调用 C 代码、操作底层系统资源（如文件、内存等）或集成第三方库（如 <code>curl</code>、<code>openssl</code>、<code>gd</code> 等）。</p>
+<p>这需要用PHP专用的生成配置文件的工具<code>phpize</code>需要用 C 语言编写 PHP 扩展函数或类,编写好扩展代码后，使用 <code>phpize</code> 生成配置文件，并通过 <code>./configure</code>、<code>make</code>、<code>make install</code> 将扩展编译为 <code>.so</code> 文件。</p>
+<p><strong>加载扩展</strong>：在 <code>php.ini</code> 中添加扩展路径，PHP 在运行时会加载这个 C 扩展库。</p>
+<h4 id="传统扩展的核心概念"><a href="#传统扩展的核心概念" class="headerlink" title="传统扩展的核心概念"></a>传统扩展的核心概念</h4><ol>
+<li><strong>Zend 引擎</strong>：PHP 的内核是 Zend 引擎，它负责 PHP 的编译、执行和内存管理。编写扩展时，开发者需要与 Zend 引擎进行交互，理解它的生命周期和 API。</li>
+<li><strong>PHP 扩展宏</strong>：PHP 提供了大量的宏和函数来简化 C 扩展的开发，比如 <code>PHP_FUNCTION()</code> 用于定义一个 PHP 函数，<code>ZEND_BEGIN_ARG_INFO()</code> 用于描述参数等。</li>
+<li><strong>内存管理</strong>：由于 PHP 使用了自己的内存管理机制（垃圾回收机制等），开发者在编写 C 扩展时需要特别注意内存分配和释放，避免内存泄漏或不安全的操作。</li>
+</ol>
+<p>场景：</p>
+<ul>
+<li><strong>性能需求</strong>：需要极高性能时，如处理大量数据或复杂算法，C 代码的执行速度比纯 PHP 快得多。</li>
+<li><strong>与操作系统交互</strong>：需要直接操作文件系统、网络、数据库等底层资源。</li>
+<li><strong>与第三方库集成</strong>：将已有的 C&#x2F;C++ 库（如 <code>curl</code>、<code>openssl</code>）集成到 PHP 中。</li>
+</ul>
+<blockquote>
+<p>缺点：</p>
+<ol>
+<li><p>只可惜开发难度太高，不深入理解zend和C无法写出</p>
+</li>
+<li><p>每次修改扩展后都需要重新编译、打包和部署，并且在不同的平台上可能需要不同的编译配置。</p>
+</li>
+<li><p><strong>PHP 版本兼容性</strong>：由于 Zend 引擎的变化，扩展可能在不同版本的 PHP 中不兼容，需要手动调整代码。</p>
+</li>
+</ol>
+</blockquote>
+<h3 id="新的FFI扩展-PHP7-3以后"><a href="#新的FFI扩展-PHP7-3以后" class="headerlink" title="新的FFI扩展(PHP7.3以后)"></a>新的FFI扩展(PHP7.3以后)</h3><p>FFI 是 PHP 7.4 引入的扩展，允许 PHP 直接调用本地的 C 函数、使用 C 结构体，并进行内存操作，而无需像传统扩展那样编写、编译和安装 C 扩展。FFI 提供了一种运行时的方式，PHP 可以直接通过字符串定义和操作 C 语言中的符号。</p>
+<h4 id="更简单的流程"><a href="#更简单的流程" class="headerlink" title="更简单的流程"></a>更简单的流程</h4><ol>
+<li><strong>声明C代码接口</strong>：可以用<code>FFI::cdef()</code>函数直接定义要调用的C函数或结构体的接口。这些接口可以是共享库（如 <code>.so</code> 或 <code>.dll</code> 文件）中定义的函数。</li>
+<li><strong>加载共享库</strong>：通过 <code>FFI::load()</code> 加载系统中的共享库文件。然后在 PHP 中可以像调用普通 PHP 函数一样调用 C 函数。</li>
+<li><strong>调用 C 函数</strong>：一旦共享库加载成功，PHP 就可以调用该库中的函数，并可以操作 C 语言的变量和结构体。</li>
+</ol>
+<h4 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h4><p><strong>C 代码接口</strong>：通过 <code>FFI::cdef()</code> 声明 C 函数和结构体的签名，PHP 会基于这些签名与底层库进行交互。</p>
+<p><strong>共享库</strong>：FFI 需要指定一个共享库（<code>.so</code> 或 <code>.dll</code> 文件）来加载这些符号。这与传统扩展不同，传统扩展是直接将 C 代码编译为 PHP 扩展，而 FFI 是通过动态加载共享库。</p>
+<p><strong>内存操作</strong>：FFI 允许直接操作底层的内存地址，甚至可以通过 PHP 操作指针和内存块。这对高级开发者很有用，但也存在潜在的安全隐患。</p>
+<p> 场景：</p>
+<p><strong>快速原型开发</strong>：如果需要快速集成某些本地库或调用系统函数，FFI 非常方便，无需编写扩展、编译和安装。</p>
+<p><strong>灵活性</strong>：在不需要极致性能的情况下，FFI 提供了一种动态的方式调用 C 函数，尤其适合那些不熟悉 C 扩展开发的 PHP 开发者。</p>
+<p><strong>简单函数调用</strong>：适合调用少量的 C 函数，或者做一些简单的系统交互。</p>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><h3 id="前置知识："><a href="#前置知识：" class="headerlink" title="前置知识："></a>前置知识：</h3><p>在 PHP 中，<code>::</code> 是一种 <strong>范围解析操作符</strong>（Scope Resolution Operator），用于访问类中的 <strong>静态成员</strong>、<strong>常量</strong>、<strong>方法</strong> 或者用于调用 <strong>父类的方法</strong>。它是一个非常重要的符号，广泛应用于面向对象编程（OOP）中。下面详细介绍 <code>::</code> 的几种主要用途。</p>
+<p>PHP 中的 <code>::</code> 主要用于以下场景：</p>
+<ol>
+<li><strong>访问静态属性或静态方法</strong>：如 <code>ClassName::staticMethod()</code> 或 <code>ClassName::$staticVar</code>。</li>
+<li><strong>访问类常量</strong>：如 <code>ClassName::CONSTANT_NAME</code>。</li>
+<li><strong>调用父类方法</strong>：如 <code>parent::methodName()</code>。</li>
+<li><strong>延迟静态绑定</strong>：如 <code>static::methodName()</code>。</li>
+<li><strong>匿名类中的静态成员访问</strong>：如 <code>$anonClass::staticMethod()</code>。</li>
+</ol>
+<h3 id="FFI的妙用"><a href="#FFI的妙用" class="headerlink" title="FFI的妙用"></a>FFI的妙用</h3><h4 id="FFI-new"><a href="#FFI-new" class="headerlink" title="FFI::new()"></a>FFI::new()</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FFI::new()创建一个新的 C 数据结构（如结构体、数组、基本类型等）</span></span><br><span class="line"><span class="comment">//签名</span></span><br><span class="line">FFI::<span class="keyword">new</span>(<span class="string">&quot;type&quot;</span>, <span class="keyword">bool</span> <span class="variable">$owned</span> = <span class="literal">true</span>, <span class="keyword">bool</span> <span class="variable">$persistent</span> = <span class="literal">false</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>**<code>type</code>**：C 数据类型，可以是基本类型（如 <code>int</code>）、结构体（如 <code>struct timeval</code>）或数组（如 <code>int[10]</code>）。</p>
+</li>
+<li><p>**<code>$owned</code>**：默认为 <code>true</code>，表示 PHP 拥有该对象的内存，当 PHP 脚本结束时，自动释放该内存。如果为 <code>false</code>，表示外部（C 代码）拥有内存，PHP 不会释放它。</p>
+</li>
+<li><p>**<code>$persistent</code>**：用于指定是否分配持久内存。默认是 <code>false</code>，表示对象是临时的。</p>
+</li>
+</ul>
+<h4 id="FFI-addr"><a href="#FFI-addr" class="headerlink" title="FFI::addr()"></a>FFI::addr()</h4><p>这个方法用于获取 C 数据结构的地址（类似于 C 语言中的 <code>&amp;</code> 操作符）。</p>
+<ul>
+<li><p>语法</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FFI::<span class="title function_ invoke__">addr</span>(<span class="variable">$c_data</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>$c_data</code>**：C 数据结构的对象，它可以是结构体、数组或基本类型。这个方法返回该对象的指针，可以用于传递给需要指针的 C 函数。</li>
+</ul>
+</li>
+</ul>
+<h4 id="FFI-cdef"><a href="#FFI-cdef" class="headerlink" title="FFI::cdef()"></a>FFI::cdef()</h4><p><code>cdef()</code> 是 FFI 的核心方法之一，它用于定义 C 函数、类型和结构体，并将它们与共享库链接起来。</p>
+<ul>
+<li><p><strong>语法</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FFI::<span class="title function_ invoke__">cdef</span>(<span class="string">&quot;C_declarations&quot;</span>, <span class="string">&quot;shared_library_path&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>C_declarations</code>**：C 函数和结构体的声明。这个字符串包含标准 C 函数或结构体的声明。</li>
+<li>**<code>shared_library_path</code>**：指定要链接的共享库路径（如 <code>libc.so.6</code> 或 <code>/usr/lib/libmylib.so</code>）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="FFI-cast"><a href="#FFI-cast" class="headerlink" title="FFI::cast()"></a>FFI::cast()</h4><p><code>cast()</code> 方法用于将一个 C 数据指针或值转换为另一种 C 类型。类似于 C 语言中的类型转换。</p>
+<ul>
+<li><p><strong>语法</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FFI::<span class="title function_ invoke__">cast</span>(<span class="string">&quot;type&quot;</span>, <span class="variable">$value</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>type</code>**：目标 C 类型（如 <code>int*</code> 或 <code>float</code>）。</li>
+<li>**<code>$value</code>**：可以是一个指针、数字或结构体，FFI 会将其转换为指定类型。</li>
+</ul>
+<p><strong>示例</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ptr</span> = FFI::<span class="keyword">new</span>(<span class="string">&quot;int*&quot;</span>);</span><br><span class="line"><span class="variable">$int_ptr</span> = FFI::<span class="title function_ invoke__">cast</span>(<span class="string">&quot;int*&quot;</span>, <span class="variable">$ptr</span>);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="FFI-sizeof"><a href="#FFI-sizeof" class="headerlink" title="FFI::sizeof()"></a>FFI::sizeof()</h4><p>sizeof()<code>方法用于返回指定 C 类型或对象的字节大小，类似于 C 语言中的</code>sizeof()</p>
+<ul>
+<li>**<code>$type_or_object</code>**：可以是一个 C 类型字符串或 C 数据结构实例，FFI 会返回该类型或对象的字节大小。</li>
+</ul>
+<p><strong>示例</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$size</span> = FFI::<span class="title function_ invoke__">sizeof</span>(<span class="string">&quot;int&quot;</span>);  <span class="comment">// 返回 int 的字节大小，通常为 4</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="FFI-alignof"><a href="#FFI-alignof" class="headerlink" title="FFI::alignof()"></a>FFI::alignof()</h4><p><code>alignof()</code> 方法返回给定 C 类型或对象的对齐要求。对齐是指数据在内存中的排列方式，通常与 CPU 的架构相关。</p>
+<h4 id="FFI-memcpy"><a href="#FFI-memcpy" class="headerlink" title="FFI::memcpy()"></a>FFI::memcpy()</h4><p><code>memcpy()</code> 方法是一个内存复制函数，类似于 C 语言中的 <code>memcpy()</code>，用于将内存区域从源复制到目标。</p>
+<ul>
+<li><p><strong>语法</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FFI::<span class="title function_ invoke__">memcpy</span>(<span class="variable">$dst</span>, <span class="variable">$src</span>, <span class="variable">$size</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>$dst</code>**：目标地址，表示数据要复制到的内存位置。</li>
+<li>**<code>$src</code>**：源地址，表示数据来源的内存位置。</li>
+<li>**<code>$size</code>**：要复制的字节大小。</li>
+</ul>
+<p><strong>示例</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$dst</span> = FFI::<span class="keyword">new</span>(<span class="string">&quot;char[20]&quot;</span>);</span><br><span class="line"><span class="variable">$src</span> = <span class="string">&quot;Hello&quot;</span>;</span><br><span class="line">FFI::<span class="title function_ invoke__">memcpy</span>(<span class="variable">$dst</span>, <span class="variable">$src</span>, <span class="title function_ invoke__">strlen</span>(<span class="variable">$src</span>) + <span class="number">1</span>);  <span class="comment">// 将字符串复制到 dst</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="FFI-free"><a href="#FFI-free" class="headerlink" title="FFI::free()"></a>FFI::free()</h4><p><code>free()</code> 方法用于手动释放通过 <code>FFI::new()</code> 分配的内存。如果分配时设置 <code>$owned = false</code>，则必须通过 <code>free()</code> 来释放内存。</p>
+<p><strong>语法</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FFI::<span class="title function_ invoke__">free</span>(<span class="variable">$c_data</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>$c_data</code>**：通过 <code>FFI::new()</code> 分配的 C 数据对象。</li>
+</ul>
+<p><strong>示例</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ptr</span> = FFI::<span class="keyword">new</span>(<span class="string">&quot;int[10]&quot;</span>);</span><br><span class="line">FFI::<span class="title function_ invoke__">free</span>(<span class="variable">$ptr</span>);  <span class="comment">// 手动释放内存</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="FFI-type"><a href="#FFI-type" class="headerlink" title="FFI::type()"></a>FFI::type()</h4><p><code>type()</code> 方法用于定义一个新的 C 类型，类似于在 C 语言中定义 <code>typedef</code>。</p>
+<ul>
+<li><p><strong>语法</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FFI::<span class="title function_ invoke__">type</span>(<span class="string">&quot;type&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>type</code>**：你想定义的 C 类型。</li>
+</ul>
+<p><strong>示例</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$int_ptr_type</span> = FFI::<span class="title function_ invoke__">type</span>(<span class="string">&quot;int*&quot;</span>);  <span class="comment">// 定义 int* 类型</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="FFI-isNull"><a href="#FFI-isNull" class="headerlink" title="FFI::isNull()"></a>FFI::isNull()</h4><p><code>isNull()</code> 方法用于检查一个 C 指针是否为空指针（<code>NULL</code>）。这在处理指针时非常有用。</p>
+<ul>
+<li><p><strong>语法</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FFI::<span class="title function_ invoke__">isNull</span>(<span class="variable">$ptr</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>$ptr</code>**：一个指针对象，用于检查是否为空指针。</li>
+</ul>
+<p><strong>示例</strong>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ptr</span> = FFI::<span class="keyword">new</span>(<span class="string">&quot;int*&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (FFI::<span class="title function_ invoke__">isNull</span>(<span class="variable">$ptr</span>)) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;Pointer is NULL&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="环境："><a href="#环境：" class="headerlink" title="环境："></a>环境：</h3><p> kali hyper-V</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install php-codesniffer</span><br><span class="line">code-oss --no-sanbox</span><br></pre></td></tr></table></figure>
+
+<p>然后设置json</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;phpcs.executablePath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/usr/bin/phpcs&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>检查是否配置ffi</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">php -m | grep FFI</span><br><span class="line">vim /etc/php/(版本)/cli/php.ini</span><br><span class="line">ffi.enable = <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="先来复现一下官方文档的"><a href="#先来复现一下官方文档的" class="headerlink" title="先来复现一下官方文档的"></a>先来复现一下官方文档的</h3><h4 id="hello"><a href="#hello" class="headerlink" title="hello!!"></a>hello!!</h4><p>先找一下libc的路径：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ldconfig -p | grep libc.so.6</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$ffi</span> = FFI::<span class="title function_ invoke__">cdef</span>(</span><br><span class="line">    <span class="string">&quot;int printf(const char *format, ...);</span></span><br><span class="line"><span class="string">    &quot;</span>,<span class="string">&quot;/path/libc.so.6&quot;</span></span><br><span class="line">);</span><br><span class="line"><span class="variable">$fii</span>-&gt;<span class="title function_ invoke__">printf</span>(<span class="string">&quot;This is %s !!!&quot;</span>, <span class="string">&quot;FFI&quot;</span>)；</span><br><span class="line"><span class="comment">// This is FFI !!!</span></span><br><span class="line"><span class="comment">//... 表示的是 可变参数</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="curl"><a href="#curl" class="headerlink" title="curl"></a>curl</h4><p>首先下载php的curl扩展</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install php-curl</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$url</span> = <span class="string">&quot;https://www.baidu.com/&quot;</span>；</span><br><span class="line"><span class="variable">$ch</span> = <span class="title function_ invoke__">curl_init</span>()；</span><br><span class="line"><span class="comment">//curl_init()函数用于初始化一个新的 cURL 会话，并返回一个句柄（资源类型），通过这个句柄 $ch 可以配置和执行具体的 cURL 操作。</span></span><br><span class="line">    </span><br><span class="line"><span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$ch</span>, CURLOPT_URL, <span class="variable">$url</span>);</span><br><span class="line"><span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$ch</span>, CURLOPT_SSL_VERIFYPEER, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">curl_exec</span>(<span class="variable">$ch</span>);</span><br><span class="line"><span class="title function_ invoke__">curl_close</span>(<span class="variable">$ch</span>);</span><br><span class="line"><span class="comment">// https的，所以会多一个设置SSL_VERIFYPEER的操作,意思是不校验ssl证书</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="gettimeofday"><a href="#gettimeofday" class="headerlink" title="gettimeofday()"></a>gettimeofday()</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 创建 gettimeofday() 绑定</span></span><br><span class="line"><span class="variable">$ffi</span> = FFI::<span class="title function_ invoke__">cdef</span>(<span class="string">&quot;</span></span><br><span class="line"><span class="string">    typedef unsigned int time_t;</span></span><br><span class="line"><span class="string">    typedef unsigned int suseconds_t;</span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">    struct timeval &#123;</span></span><br><span class="line"><span class="string">        time_t      tv_sec;</span></span><br><span class="line"><span class="string">        suseconds_t tv_usec;</span></span><br><span class="line"><span class="string">    &#125;;</span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">    struct timezone &#123;</span></span><br><span class="line"><span class="string">        int tz_minuteswest;</span></span><br><span class="line"><span class="string">        int tz_dsttime;</span></span><br><span class="line"><span class="string">    &#125;;</span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">    int gettimeofday(struct timeval *tv, struct timezone *tz);    </span></span><br><span class="line"><span class="string">&quot;</span>, <span class="string">&quot;libc.so.6&quot;</span>);</span><br><span class="line"><span class="comment">// 创建 C 数据结构</span></span><br><span class="line"><span class="variable">$tv</span> = <span class="variable">$ffi</span>-&gt;<span class="keyword">new</span>(<span class="string">&quot;struct timeval&quot;</span>);</span><br><span class="line"><span class="variable">$tz</span> = <span class="variable">$ffi</span>-&gt;<span class="keyword">new</span>(<span class="string">&quot;struct timezone&quot;</span>);</span><br><span class="line"><span class="comment">// 调用 C 的 gettimeofday()</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$ffi</span>-&gt;<span class="title function_ invoke__">gettimeofday</span>(FFI::<span class="title function_ invoke__">addr</span>(<span class="variable">$tv</span>), FFI::<span class="title function_ invoke__">addr</span>(<span class="variable">$tz</span>)));</span><br><span class="line"><span class="comment">// 访问 C 数据结构的字段</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$tv</span>-&gt;tv_sec);</span><br><span class="line"><span class="comment">// 打印完整数据结构</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$tz</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="C变量的操作"><a href="#C变量的操作" class="headerlink" title="C变量的操作"></a>C变量的操作</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">// 创建新的 C int 变量</span></span><br><span class="line"><span class="variable">$x</span> = FFI::<span class="keyword">new</span>(<span class="string">&quot;int&quot;</span>);</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$x</span>-&gt;cdata);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 简单赋值</span></span><br><span class="line"><span class="variable">$x</span>-&gt;cdata = <span class="number">5</span>;</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$x</span>-&gt;cdata);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 复合赋值</span></span><br><span class="line"><span class="variable">$x</span>-&gt;cdata += <span class="number">2</span>;</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$x</span>-&gt;cdata);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建 C 数据结构</span></span><br><span class="line"><span class="variable">$a</span> = FFI::<span class="keyword">new</span>(<span class="string">&quot;long[1024]&quot;</span>);</span><br><span class="line"><span class="comment">// 使用它就像使用常规数组</span></span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">0</span>; <span class="variable">$i</span> &lt; <span class="title function_ invoke__">count</span>(<span class="variable">$a</span>); <span class="variable">$i</span>++) &#123;</span><br><span class="line">    <span class="variable">$a</span>[<span class="variable">$i</span>] = <span class="variable">$i</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$a</span>[<span class="number">25</span>]);</span><br><span class="line"><span class="variable">$sum</span> = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">foreach</span> (<span class="variable">$a</span> <span class="keyword">as</span> <span class="variable">$n</span>) &#123;</span><br><span class="line">    <span class="variable">$sum</span> += <span class="variable">$n</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$sum</span>);</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">count</span>(<span class="variable">$a</span>));</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(FFI::<span class="title function_ invoke__">sizeof</span>(<span class="variable">$a</span>));</span><br><span class="line"></span><br><span class="line"><span class="variable">$a</span> = FFI::<span class="title function_ invoke__">cdef</span>(<span class="string">&#x27;typedef enum _zend_ffi_symbol_kind &#123;</span></span><br><span class="line"><span class="string">    ZEND_FFI_SYM_TYPE,</span></span><br><span class="line"><span class="string">    ZEND_FFI_SYM_CONST = 2,</span></span><br><span class="line"><span class="string">    ZEND_FFI_SYM_VAR,</span></span><br><span class="line"><span class="string">    ZEND_FFI_SYM_FUNC</span></span><br><span class="line"><span class="string">&#125; zend_ffi_symbol_kind;</span></span><br><span class="line"><span class="string">&#x27;</span>);</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$a</span>-&gt;ZEND_FFI_SYM_TYPE);</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$a</span>-&gt;ZEND_FFI_SYM_CONST);</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$a</span>-&gt;ZEND_FFI_SYM_VAR);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>ZEND_FFI_SYM_TYPE</code>：默认值是 <code>0</code>，因为它是第一个枚举项，没有明确指定值。</p>
+<p><code>ZEND_FFI_SYM_CONST = 2</code>：显式指定为 <code>2</code>，跳过了 <code>1</code>。</p>
+<p><code>ZEND_FFI_SYM_VAR</code>：由于 <code>ZEND_FFI_SYM_CONST</code> 是 <code>2</code>，因此 <code>ZEND_FFI_SYM_VAR</code> 自动取 <code>3</code>。</p>
+<p><code>ZEND_FFI_SYM_FUNC</code>：紧随其后，自动取 <code>4</code>。</p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/HTML%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">HTML学习总结</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/LD_PRELOAD/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">LD_PRELOAD</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

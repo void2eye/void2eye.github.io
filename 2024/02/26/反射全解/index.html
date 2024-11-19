@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>反射全解 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="反射全解 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/%E5%8F%8D%E5%B0%84%E5%85%A8%E8%A7%A3/index.html" />
+  
+  <meta property="og:image" content="/img/ye7.png" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/java/">java</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">反射全解</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="反射"><a href="#反射" class="headerlink" title="反射"></a>反射</h1><h2 id="初解"><a href="#初解" class="headerlink" title="初解"></a>初解</h2><p>反射（Reflection）是Java提供的一种机制，允许程序在运行时获取类的结构信息（如类名、方法、构造函数、字段等），并动态地创建对象、调用方法或访问字段。它通常用于框架、动态代理和工具类库中。</p>
+<p>反射相关的类主要位于 <code>java.lang.reflect</code> 包下，而 <code>Class</code> 类是进入反射世界的入口。</p>
+<p><code>RCE流程</code>：</p>
+<p><code>forName</code>获取类 -&gt; <code>newInstance</code>获取该类的实例 -&gt; <code>getMethod(getConstructor)</code>获取该实例的方法 -&gt;<code>invoke</code>执行方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">reflect1</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(String className, String methodName)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Class</span> <span class="variable">reflectClass</span> <span class="operator">=</span> Class.forName(className);</span><br><span class="line">        reflectClass.getMethod(methodName).invoke(reflectClass.newInstance());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 记得 import java.lang.reflect.*;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="forName"><a href="#forName" class="headerlink" title="forName"></a>forName</h2><p>可以加载任意类的神器</p>
+<p>必须全限定名，只有默认包才不需要(<code>默认包就是没有声明package</code>)</p>
+<blockquote>
+<p>如果是内部类就是需要<code>example.Class1$evilClass</code></p>
+</blockquote>
+<h2 id="java9之后的升级"><a href="#java9之后的升级" class="headerlink" title="java9之后的升级"></a>java9之后的升级</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Class&lt;?&gt; getEvilClass = Class.forName(<span class="string">&quot;example.evilClass&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">Object</span> <span class="variable">instance</span> <span class="operator">=</span> getEvilClass.getDeclaredConstructor().newInstance();</span><br><span class="line"></span><br><span class="line"><span class="type">Method</span> <span class="variable">evilMethod</span> <span class="operator">=</span> getEvilClass.getDeclaredMethod(<span class="string">&quot;evilMethod&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//evilMethod.setAccessible(true); 如果方法是私有类</span></span><br><span class="line"></span><br><span class="line">evilMethod.invoke(instance);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>**避免使用原始类型 (<code>raw type</code>)**：使用 <code>Class&lt;?&gt;</code> 是为了避免泛型相关的警告，保证代码的类型安全性。Java中的泛型提供了在编译时进行类型检查的能力，如果不使用泛型，可能会导致运行时的类型转换异常。</p>
+</blockquote>
+<blockquote>
+<p><strong><code>newInstance()</code> 已过时</strong>：<code>clazz.newInstance()</code> 这个方法依赖于无参构造函数，且在Java 9中被标记为过时。推荐使用 <code>getDeclaredConstructor().newInstance()</code>，这样不仅可以显式获取无参构造函数，还能更加灵活地处理私有构造函数的实例化。</p>
+</blockquote>
+<blockquote>
+<p><code>getMethod()</code>只能获得<code>公有方法</code>,包括从<code>父类继承</code>的方法，所以新版则是获得声明的方法：<code>getDeclaredMethod()</code>更加灵活，遇到私有属性可以<code>setAccessible(true)</code>,但是从父类里继承来的就不包含了。</p>
+</blockquote>
+<h3 id="简单例子"><a href="#简单例子" class="headerlink" title="简单例子"></a>简单例子</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">reflectClass</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;java.lang.Runtime&quot;</span>);</span><br><span class="line">reflectClass.getMethod(<span class="string">&quot;exec&quot;</span>, String.class).invoke(reflectClass.newInstance(), <span class="string">&quot;id&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这当然是失败的，因为Runtime 类的构造方法是<code>私有的</code>。</p>
+</blockquote>
+<ul>
+<li>注意  这里<code>String.class</code>是告诉 <code>getMethod()</code>，需要找到接受 <code>String</code> 作为参数的方法。</li>
+<li><code>String.class</code> 的 <code>.class</code> 是<strong>获取 <code>Class</code> 对象的语法</strong>，表示当前类型对应的 <code>Class</code> 对象。具体来说：<ul>
+<li>**<code>String.class</code>**：它返回 <code>Class&lt;String&gt;</code>，即代表 <code>String</code> 类的 <code>Class</code> 对象。</li>
+<li>**<code>int.class</code>**：表示基本类型 <code>int</code> 的 <code>Class</code> 对象。</li>
+<li>**<code>void.class</code>**：表示 <code>void</code> 返回类型的 <code>Class</code> 对象。</li>
+</ul>
+</li>
+</ul>
+<p><code>.class</code> 是一种编译时获取类型的 <code>Class</code> 对象的方式，它可以在编译时告诉 Java 反射机制当前的参数类型是什么。这在反射中非常重要，因为你需要准确指定方法的参数类型，反射才能正确地找到匹配的方法。</p>
+<p>两种解决方法：</p>
+<h4 id="通过-Runtime-getRuntime-来获取到-Runtime-对象。"><a href="#通过-Runtime-getRuntime-来获取到-Runtime-对象。" class="headerlink" title="通过 Runtime.getRuntime() 来获取到 Runtime 对象。"></a>通过 Runtime.getRuntime() 来获取到 Runtime 对象。</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">reflectClass</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;java.lang.Runtime&quot;</span>);</span><br><span class="line">reflectClass.getMethod(<span class="string">&quot;exec&quot;</span>, String.class).invoke(reflectClass.getMethod(<span class="string">&quot;getRuntime&quot;</span>).invoke(reflectClass), <span class="string">&quot;id&quot;</span>)</span><br><span class="line"><span class="comment">//感觉很不优美</span></span><br><span class="line">    </span><br><span class="line"> <span class="comment">// 1. 获取 Runtime 类的 Class 对象</span></span><br><span class="line">Class&lt;?&gt; reflectClass = Class.forName(<span class="string">&quot;java.lang.Runtime&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 获取 Runtime 类的 getRuntime() 方法，并通过反射调用它来获得 Runtime 实例</span></span><br><span class="line"><span class="type">Method</span> <span class="variable">getRuntimeMethod</span> <span class="operator">=</span> reflectClass.getMethod(<span class="string">&quot;getRuntime&quot;</span>);</span><br><span class="line"><span class="type">Object</span> <span class="variable">runtimeInstance</span> <span class="operator">=</span> getRuntimeMethod.invoke(<span class="literal">null</span>);  <span class="comment">// getRuntime 是静态方法，因此第一个参数传 null</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 获取 exec(String) 方法</span></span><br><span class="line"><span class="type">Method</span> <span class="variable">execMethod</span> <span class="operator">=</span> reflectClass.getMethod(<span class="string">&quot;exec&quot;</span>, String.class);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 4. 调用 exec 方法，传入命令 &quot;id&quot;</span></span><br><span class="line">execMethod.invoke(runtimeInstance, <span class="string">&quot;id&quot;</span>);</span><br><span class="line"><span class="comment">//这就很爽了</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="新方法"><a href="#新方法" class="headerlink" title="新方法"></a>新方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Class&lt;?&gt; getEvilClass = Class.forName(<span class="string">&quot;example.evilClass&quot;</span>);</span><br><span class="line"></span><br><span class="line">Constructor&lt;?&gt; constructor = getEvilClass.getDeclaredConstructor();</span><br><span class="line"><span class="comment">//有参 getEvilClass.getDeclaredConstructor(String.class);</span></span><br><span class="line"></span><br><span class="line"><span class="type">Object</span> <span class="variable">instance</span> <span class="operator">=</span> constructor.newInstance();</span><br><span class="line"><span class="comment">//传参 constructor.newInstance(&quot;Hello, World!&quot;);</span></span><br><span class="line"></span><br><span class="line"><span class="type">Method</span> <span class="variable">evilMethod</span> <span class="operator">=</span> getEvilClass.getDeclaredMethod(<span class="string">&quot;evilMethod&quot;</span>);</span><br><span class="line"></span><br><span class="line">evilMethod.setAccessible(<span class="literal">true</span>); </span><br><span class="line"></span><br><span class="line">evilMethod.invoke(instance);</span><br></pre></td></tr></table></figure>
+
+<h2 id="重载"><a href="#重载" class="headerlink" title="重载"></a>重载</h2><p><strong>重载（Overloading）</strong> 是面向对象编程中一种方法名称的多态性，指的是在<strong>同一个类</strong>中，允许存在<strong>多个同名</strong>的<strong>方法</strong>，但是这些方法的<strong>参数列表</strong>（即参数的类型、数量或顺序）必须<strong>不同</strong>。通过重载，可以在相同的方法名下实现不同的功能，编译器会根据方法调用时的参数类型和数量，选择对应的重载方法。</p>
+<p>例子</p>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20240906170738779.png" alt="image-20240906170738779"></p>
+<p>有三种重载选第一种单参数的重载就可以。</p>
+<h2 id="invoke"><a href="#invoke" class="headerlink" title="invoke"></a>invoke</h2><p><code>invoke()</code> 是 Java 反射机制中的一个关键方法，属于 <code>Method</code> 类。它用于在运行时调用通过反射获取的方法。换句话说，<code>invoke()</code> 允许你在不知道或无法直接访问某个类的情况下，动态地调用该类的某个方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Object <span class="title function_">invoke</span><span class="params">(Object obj, Object... args)</span> <span class="keyword">throws</span> IllegalAccessException, IllegalArgumentException, InvocationTargetException</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>**<code>obj</code>**：要调用该方法的对象。如果调用的是静态方法，则该参数传递 <code>null</code>。</li>
+<li>**<code>args</code>**：传递给方法的参数。如果该方法不需要参数，则可以传递 <code>null</code> 或空数组。</li>
+</ul>
+<p>返回值：<code>invoke()</code> 返回的是该方法的返回值，如果该方法的返回类型是 <code>void</code>，那么 <code>invoke()</code> 返回 <code>null</code>。</p>
+<p>直白一点：</p>
+<p>正常执行方法是<code> [1].method([2], [3], [4]...)</code> ，其实在反射里就是</p>
+<p><code>method.invoke([1], [2], [3], [4]...)</code> 。</p>
+<p>所以上面的例子的另一种写法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">reflectClass</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;java.lang.Runtime&quot;</span>);</span><br><span class="line"><span class="type">Method</span> <span class="variable">execMethod</span> <span class="operator">=</span> reflectClass.getMethod(<span class="string">&quot;exec&quot;</span>, String.class)；</span><br><span class="line"><span class="type">Method</span> <span class="variable">getRuntimeMethod</span> <span class="operator">=</span> reflectClass.getMethod(<span class="string">&quot;getRuntime&quot;</span>);</span><br><span class="line"><span class="type">Object</span> <span class="variable">runtime</span> <span class="operator">=</span> getRuntimeMethod.invoke(reflectClass);</span><br><span class="line">execMethod.invoke(runtime, <span class="string">&quot;calc.exe&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="ProcessBuilder"><a href="#ProcessBuilder" class="headerlink" title="ProcessBuilder"></a>ProcessBuilder</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;java.lang.ProcessBuilder&quot;</span>);</span><br><span class="line">((ProcessBuilder) clazz.getConstructor(List.class).newInstance(Arrays.asList(<span class="string">&quot;calc.exe&quot;</span>))).start();</span><br></pre></td></tr></table></figure>
+
+<p>这其实是一个强制类型转换</p>
+<p>将<code>clazz.getConstructor(List.class).newInstance(Arrays.asList(&quot;calc.exe&quot;))</code> 的返回值从 <code>Object</code> 强制转换为 <code>ProcessBuilder</code> 类型。</p>
+<h2 id="强制转换"><a href="#强制转换" class="headerlink" title="强制转换"></a>强制转换</h2><p>在 Java 中，反射相关的方法（如 <code>newInstance()</code>）返回的类型通常是 <code>Object</code>。为了调用具体类的方法，必须将返回的 <code>Object</code> 类型强制转换为正确的类型。</p>
+<p>在上面的payload中，<code>clazz.getConstructor().newInstance()</code> 返回的是 <code>Object</code> 类型，这个对象在实际运行时是 <code>ProcessBuilder</code> 的实例。因此，为了能够调用 <code>ProcessBuilder</code> 的方法（如 <code>start()</code>），必须将它转换为 <code>ProcessBuilder</code> 类型。</p>
+<p>为了防止抛出<code>ClassCastException</code>异常</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> clazz.getConstructor(List.class).newInstance(Arrays.asList(<span class="string">&quot;calc.exe&quot;</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> ProcessBuilder) &#123;</span><br><span class="line">    <span class="type">ProcessBuilder</span> <span class="variable">pb</span> <span class="operator">=</span> (ProcessBuilder) obj;</span><br><span class="line">    pb.start();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;对象不是 ProcessBuilder 类型&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在这里，<code>instanceof</code> 用来检查 <code>obj</code> 是否是 <code>ProcessBuilder</code> 类型。如果是，则进行强制类型转换；否则，输出错误信息。</p>
+<h3 id="其他常见的强制类型转换场景"><a href="#其他常见的强制类型转换场景" class="headerlink" title="其他常见的强制类型转换场景"></a>其他常见的强制类型转换场景</h3><ol>
+<li><p><strong>向下转型</strong>：从父类或接口类型向子类转型，这是最常见的强制类型转换。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(<span class="string">&quot;Hello&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> (String) obj;  <span class="comment">// 强制类型转换，将 Object 转换为 String</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>泛型类型擦除</strong>：由于 Java 泛型在运行时会被类型擦除，有时候你可能需要强制将 <code>Object</code> 类型转换为某个泛型类型。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;?&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">List&lt;String&gt; stringList = (List&lt;String&gt;) list;  <span class="comment">// 强制转换为泛型类型</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>接口类型转换</strong>：当一个类实现了某个接口时，你可以将该对象强制转换为接口类型。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">Collection&lt;String&gt; collection = (Collection&lt;String&gt;) list;  <span class="comment">// 强制转换为 Collection 类型</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="泛型类型擦除"><a href="#泛型类型擦除" class="headerlink" title="泛型类型擦除"></a>泛型类型擦除</h2><h4 id="实际情况：Java-编译时的泛型类型和运行时的类型擦除"><a href="#实际情况：Java-编译时的泛型类型和运行时的类型擦除" class="headerlink" title="实际情况：Java 编译时的泛型类型和运行时的类型擦除"></a>实际情况：Java 编译时的泛型类型和运行时的类型擦除</h4><p>例如，假设你有一个 <code>List&lt;String&gt;</code>，在编译时，Java 会知道这个 <code>List</code> 是用于存储 <code>String</code> 类型的对象，但是在运行时，Java 会将它当作一个普通的 <code>List</code>，类型信息被“擦除”。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; stringList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">stringList.add(<span class="string">&quot;hello!&quot;</span>);</span><br><span class="line"></span><br><span class="line">List&lt;Integer&gt; intList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">intList.add(<span class="number">111</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在运行时，类型信息被擦除，两者都变成 List</span></span><br></pre></td></tr></table></figure>
+
+<p>在运行时，<code>stringList</code> 和 <code>intList</code> 看起来一样，它们都是 <code>List</code>，并且不保留 <code>String</code> 或 <code>Integer</code> 类型的信息。这就是<strong>类型擦除</strong>的本质。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GenericBox</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">private</span> T item;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">set</span><span class="params">(T item)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.item = item;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> T <span class="title function_">get</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> item;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        GenericBox&lt;String&gt; stringBox = <span class="keyword">new</span> <span class="title class_">GenericBox</span>&lt;&gt;();</span><br><span class="line">        stringBox.set(<span class="string">&quot;kanye&quot;</span>);</span><br><span class="line">        </span><br><span class="line">        GenericBox&lt;Integer&gt; intBox = <span class="keyword">new</span> <span class="title class_">GenericBox</span>&lt;&gt;();</span><br><span class="line">        intBox.set(<span class="number">111</span>);</span><br><span class="line">        </span><br><span class="line">        System.out.println(stringBox.get());  <span class="comment">//kanye</span></span><br><span class="line">        System.out.println(intBox.get());  <span class="comment">//111</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>虽然 <code>GenericBox&lt;String&gt;</code> 和 <code>GenericBox&lt;Integer&gt;</code> 在编译时有区别，但在运行时，这两个对象是相同的，都是 <code>GenericBox</code> 类型。Java 编译器在编译时确保类型安全，但在运行时，<strong>所有泛型类型的具体信息都被擦除</strong>。</p>
+<h4 id="泛型类型擦除的好处和限制："><a href="#泛型类型擦除的好处和限制：" class="headerlink" title="泛型类型擦除的好处和限制："></a>泛型类型擦除的好处和限制：</h4><ul>
+<li><strong>好处</strong>：泛型类型擦除让 Java 的泛型能够与已有的类库和接口兼容（如 <code>Collection</code>），不需要对旧代码做大的修改。</li>
+<li><strong>限制</strong>：由于类型信息被擦除，Java 的泛型不能用于基础类型（如 <code>int</code>），也无法在运行时检查对象的泛型类型。你无法在运行时获取泛型类型的具体信息。</li>
+</ul>
+<p>例如，下面代码是非法的，因为泛型类型在运行时被擦除，Java 无法知道 <code>List&lt;Integer&gt;</code> 和 <code>List&lt;String&gt;</code> 的区别：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (stringList <span class="keyword">instanceof</span> List&lt;String&gt;) &#123;  <span class="comment">// 错误：类型擦除后，无法区分 List&lt;String&gt; 和其他类型</span></span><br><span class="line">    System.out.println(<span class="string">&quot;This is a list of strings&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="接口类型转换"><a href="#接口类型转换" class="headerlink" title="接口类型转换"></a>接口类型转换</h2><p>假设你有一个类实现了多个接口，你可以在代码中将该对象转换为不同的接口类型。例如，类 <code>Person</code> 实现了 <code>Singer</code> 和 <code>Programmer</code> 两个接口。根据具体场景，你可以将 <code>Person</code> 对象转换为 <code>Singer</code> 或 <code>Programmer</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">Singer</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">sing</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Programmer</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">code</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Person</span> <span class="keyword">implements</span> <span class="title class_">Singer</span>, Programmer &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sing</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.prinln(<span class="string">&quot;Singing...&quot;</span>);</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">code</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Coding...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Person</span> <span class="variable">person</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将 person 转换为 Singer 类型，调用 sing 方法</span></span><br><span class="line">        <span class="type">Singer</span> <span class="variable">singer</span> <span class="operator">=</span> (Singer) person;</span><br><span class="line">        singer.sing();  <span class="comment">// 输出: Singing...</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将 person 转换为 Programmer 类型，调用 code 方法</span></span><br><span class="line">        <span class="type">Programmer</span> <span class="variable">programmer</span> <span class="operator">=</span> (Programmer) person;</span><br><span class="line">        programmer.code();  <span class="comment">// 输出: Coding...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="接口类型转换的规则："><a href="#接口类型转换的规则：" class="headerlink" title="接口类型转换的规则："></a>接口类型转换的规则：</h4><ul>
+<li>如果一个类实现了某个接口，你可以将该对象转换为这个接口类型。</li>
+<li>如果尝试将对象转换为它没有实现的接口，编译器会抛出错误。</li>
+<li>接口转换的好处是让代码更加灵活，增强了多态性，使对象可以以不同的方式在不同的场景中工作。</li>
+</ul>
+<h4 id="强制类型转换（接口类型转换）："><a href="#强制类型转换（接口类型转换）：" class="headerlink" title="强制类型转换（接口类型转换）："></a>强制类型转换（接口类型转换）：</h4><p>接口类型转换使用 Java 的<strong>强制类型转换</strong>，就像将一个对象从父类转换为子类一样，必须通过 <code>(InterfaceType)</code> 的语法进行转换。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Programmer</span> <span class="variable">programmer</span> <span class="operator">=</span> (Programmer) person;</span><br></pre></td></tr></table></figure>
+
+<h2 id="可变长参数"><a href="#可变长参数" class="headerlink" title="可变长参数"></a>可变长参数</h2><p>首先可以知道<code>ProcessBuilder</code>有两个构造函数</p>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20240906184334741.png" alt="image-20240906184334741"></p>
+<p>Java里的可变长参数（<code>varargs</code>）了。正如其他语言一样，Java也支持可变长参数，就是当你</p>
+<p>定义函数的时候不确定参数数量的时候，可以使用<code>...</code>这样的语法来表示“这个函数的参数个数是可变</p>
+<p>的”。</p>
+<blockquote>
+<p>对于可变长参数，Java其实在编译的时候会编译成一个数组，也就是说，如下这两种写法在底层是等价</p>
+<p>的及签名一样（也就不能重载）：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">hello</span><span class="params">(String[] names)</span> &#123;&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">hello</span><span class="params">(String...names)</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也由此，如果我们有一个数组，想传给hello函数，只需直接传即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String[] names = &#123;<span class="string">&quot;hello&quot;</span>, <span class="string">&quot;world&quot;</span>&#125;;</span><br><span class="line">hello(names);</span><br></pre></td></tr></table></figure>
+
+<p>那么对于反射来说，如果要获取的目标函数里包含可变长参数，其实我们认为它是数组就行了。</p>
+<p>所以，我们将字符串数组的类 String[].class 传给 getConstructor ，获取 ProcessBuilder 的第二</p>
+<p>种构造函数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">reflectClass</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;java.lang.ProcessBuilder&quot;</span>);</span><br><span class="line">reflectClass.getConstructor(String[].class);</span><br></pre></td></tr></table></figure>
+
+<p>所以有两层数组，</p>
+<ul>
+<li>外层为调用构造函数所需要的<code>数组</code></li>
+<li>内层为需要传给<code>已经实例化的对象的方法</code>的<code>命令</code>也是一个数组</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">reflectClass</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;java.lang.ProcessBuilder&quot;</span>);</span><br><span class="line">((ProcessBuilder)</span><br><span class="line">reflectClass.getConstructor(String[].class).newInstance(<span class="keyword">new</span> <span class="title class_">String</span>[][]&#123;&#123;<span class="string">&quot;calc.exe&quot;</span>&#125;&#125;)</span><br><span class="line"> );</span><br><span class="line"></span><br><span class="line"><span class="comment">//完全反射编写</span></span><br><span class="line">Class&lt;?&gt; reflectClass = Class.forName(<span class="string">&quot;java.lang.ProcessBuilder&quot;</span>);</span><br><span class="line"></span><br><span class="line">Constructor&lt;?&gt; constructor = reflectClass.getConstructor(String[].class);</span><br><span class="line"></span><br><span class="line"><span class="type">Object</span> <span class="variable">processBuilderInstance</span> <span class="operator">=</span> constructor.newInstance((Object) <span class="keyword">new</span> <span class="title class_">String</span>[] &#123;<span class="string">&quot;calc.exe&quot;</span>&#125;);</span><br><span class="line"></span><br><span class="line">Method&lt;?&gt; startMethod = reflectClass.getMethod(<span class="string">&quot;start&quot;</span>);</span><br><span class="line"><span class="comment">//当然可以用getDeclareMethod，但是ProcessBuilder的实例里的start方法是public的，所以没必要用getDclareMethod</span></span><br><span class="line"></span><br><span class="line">startMethod.invoke(processBuilderInstance);</span><br><span class="line"><span class="comment">//还记得之前写的invoke的使用逻辑吗？</span></span><br><span class="line"><span class="comment">//比如aa(bb,cc).dd用invoke调用的话就是dd.invoke(aa,bb);</span></span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">java反序列化</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/%E5%AE%89%E6%B4%B5%E6%9D%AF%E5%A4%8D%E7%8E%B0/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">安洵杯复现（写在carbo那里了:）</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>RMI - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="RMI - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/RMI/index.html" />
+  
+  <meta property="og:image" content="/img/ye9.webp" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/java/">java</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">RMI</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="RMI基本要素"><a href="#RMI基本要素" class="headerlink" title="RMI基本要素"></a>RMI基本要素</h1><h2 id="RMIServer构成"><a href="#RMIServer构成" class="headerlink" title="RMIServer构成"></a>RMIServer构成</h2><ul>
+<li>一个继承了Remote类的接口，定义远程调用的函数。</li>
+<li>一个实现该接口的类</li>
+<li>一个主类来创建Registry，并将上面的实现了接口的类实例化后绑定一个地址，得到Server</li>
+</ul>
+<h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><ul>
+<li>只需要调用Naming.lookup()来找远程注册的对象</li>
+</ul>
+<p><code>Java是强类型语言</code></p>
+<blockquote>
+<p><code>Naming.lookup()</code> 是 Java RMI 提供的一个方法，用于从远程 RMI 注册表中<strong>查找远程对象</strong>。</p>
+<p>该方法返回的是一个通用的 <strong><code>Remote</code></strong> 类型的对象，因为 <code>Remote</code> 是所有远程接口的父接口（标记接口）。也就是说，<code>Naming.lookup()</code> 不知道它具体返回的是什么类型的远程对象，只能返回一个通用的 <code>Remote</code> 对象。</p>
+<p>因此，<code>Naming.lookup(&quot;rmi://localhost:1099/hello&quot;)</code> 返回的对象是 <code>Remote</code> 类型，但这只是一个<strong>父类类型</strong>的引用，实际的对象类型可能是你定义的远程接口类型，例如 <code>RMIServer.IRemoteHello</code>。</p>
+</blockquote>
+<h2 id="通信过程"><a href="#通信过程" class="headerlink" title="通信过程"></a>通信过程</h2><ul>
+<li>RMI Registry</li>
+<li>RMI Server</li>
+<li>RMI Client</li>
+</ul>
+<h1 id="代码实现相关"><a href="#代码实现相关" class="headerlink" title="代码实现相关"></a>代码实现相关</h1><h2 id="多重继承"><a href="#多重继承" class="headerlink" title="多重继承"></a>多重继承</h2><p>java不允许多重继承，但是允许一个类继承一个类，然后实现多个接口。</p>
+<p>就像Server里面实现的接口的类，其签名为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RemoteHello</span> <span class="keyword">extends</span> <span class="title class_">UnicastRemoteObject</span> <span class="keyword">implements</span> <span class="title class_">IRemoteHello</span></span><br></pre></td></tr></table></figure>
+
+<p>同时接口IRemoteHello则继承RMI的父类Remote</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IRemoteHello</span> <span class="keyword">extends</span> <span class="title class_">Remote</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到Remote实际是一个<strong>标记接口</strong>（marker interface），它不包含任何方法，但是通过继承 <code>Remote</code>，Java RMI 系统知道这个接口中的方法可以通过网络进行调用。</p>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20240918115606272.png" alt="image-20240918115606272"></p>
+<p>所以继承Remote接口的意义就是 <code>IRemoteHello</code> 成为一个 <strong>远程接口</strong>。所有继承自 <code>Remote</code> 的接口表示该接口中的方法可以通过 RMI 在远程调用。</p>
+<h1 id="攻击方法"><a href="#攻击方法" class="headerlink" title="攻击方法"></a>攻击方法</h1><h2 id="攻击RMI-Registry"><a href="#攻击RMI-Registry" class="headerlink" title="攻击RMI Registry"></a>攻击RMI Registry</h2><p>限制：只能localhost源才能访问rebind，bind，unbind方法。</p>
+<p>但是能用的是：list 和 lookup方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">String[] s = Naming.list(<span class="string">&quot;rmi://localhost:1099&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;可用类：&quot;</span>+ Arrays.toString(s));</span><br><span class="line"></span><br><span class="line"><span class="comment">//可用类：[//localhost:1099/hello]</span></span><br><span class="line"></span><br><span class="line">如果直接输出s，则会输出：[Ljava.lang.String;@4411d970，是一个不可读的信息</span><br></pre></td></tr></table></figure>
+
+<p>lookup作用就是获得某个远程对象。</p>
+<p>其实就是这段<img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20240922185700301.png" alt="image-20240922185700301"></p>
+<p>那么，只要目标服务器上存在一些危险方法，我们通过RMI就可以对其进行调用</p>
+<blockquote>
+<p>当然肯定不会这么简单</p>
+</blockquote>
+<h2 id="RMI利用codebase执行任意代码"><a href="#RMI利用codebase执行任意代码" class="headerlink" title="RMI利用codebase执行任意代码"></a>RMI利用codebase执行任意代码</h2><p>codebase是一个地址，告诉Java虚拟机我们应该从哪个地方去搜索类，有点像我们日常用的</p>
+<p>CLASSPATH，但CLASSPATH是本地路径，而codebase通常是远程URL，比如http、ftp等。</p>
+<p>如果我们指定 codebase&#x3D;<a href="http://example.com/">http://example.com/</a> ，然后加载 org.vulhub.example.Example 类，则</p>
+<p>Java虚拟机会下载这个文件 <a href="http://example.com/org/vulhub/example/Example.class">http://example.com/org/vulhub/example/Example.class</a> ，并作为</p>
+<p>Example类的字节码。</p>
+<p>这个时候问题就来了，如果codebase被控制，我们不就可以加载恶意类了吗？</p>
+<p>对，在RMI中，我们是可以将codebase随着序列化数据一起传输的，服务器在接收到这个数据后就会去</p>
+<p>CLASSPATH和指定的codebase寻找类，由于codebase被控制导致任意命令执行漏洞。</p>
+<p>不过显然官方也注意到了这一个安全隐患，所以只有满足如下条件的RMI服务器才能被攻击：</p>
+<ul>
+<li><p>安装并配置了SecurityManager</p>
+</li>
+<li><p>Java版本低于7u21、6u45，或者设置了 java.rmi.server.useCodebaseOnly&#x3D;false</p>
+</li>
+</ul>
+<p>其中 java.rmi.server.useCodebaseOnly 是在Java 7u21、6u45的时候修改的一个默认设置：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/7/docs/technotes/guides/rmi/enhancements-7.html">https://docs.oracle.com/javase/7/docs/technotes/guides/rmi/enhancements-7.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.oracle.com/technetwork/java/javase/7u21-relnotes-1932873.html">https://www.oracle.com/technetwork/java/javase/7u21-relnotes-1932873.html</a></p>
+<p>官方将 java.rmi.server.useCodebaseOnly 的默认值由 false 改为了 true 。在</p>
+<p>java.rmi.server.useCodebaseOnly 配置为 true 的情况下，Java虚拟机将只信任预先配置好的</p>
+<p>codebase ，不再支持从RMI请求中获取。</p>
+<blockquote>
+<p>查看example.com的日志，可见收到了来自Java的请求 &#x2F;RMIClient$Payload.class 。因为我们还没</p>
+<p>有实际放置这个类文件，所以上面出现了异常：</p>
+<p>我们只需要编译一个恶意类，将其class文件放置在Web服务器的 &#x2F;RMIClient$Payload.class 即可。</p>
+</blockquote>
+<h2 id="在java序列化流里加入codebase"><a href="#在java序列化流里加入codebase" class="headerlink" title="在java序列化流里加入codebase"></a>在java序列化流里加入codebase</h2><p>通过查看序列化流数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line">STREAM_MAGIC - <span class="number">0xac</span> ed</span><br><span class="line">STREAM_VERSION - <span class="number">0x00</span> <span class="number">05</span></span><br><span class="line">Contents</span><br><span class="line">TC_BLOCKDATA - <span class="number">0x77</span></span><br><span class="line">Length - <span class="number">15</span> - <span class="number">0x0f</span></span><br><span class="line">Contents - <span class="number">0x01a4462ec50000016d8d8d63578008</span></span><br><span class="line">TC_OBJECT - <span class="number">0x73</span></span><br><span class="line">TC_PROXYCLASSDESC - <span class="number">0x7d</span></span><br><span class="line">newHandle <span class="number">0x00</span> 7e <span class="number">00</span> <span class="number">00</span></span><br><span class="line">Interface count - <span class="number">2</span> - <span class="number">0x00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">02</span></span><br><span class="line">proxyInterfaceNames</span><br><span class="line"><span class="number">0</span>:</span><br><span class="line">Length - <span class="number">15</span> - <span class="number">0x00</span> <span class="number">0f</span></span><br><span class="line">Value - java.rmi.Remote - <span class="number">0x6a6176612e726d692e52656d6f7465</span></span><br><span class="line"><span class="number">1</span>:</span><br><span class="line">Length - <span class="number">5</span> - <span class="number">0x00</span> <span class="number">05</span></span><br><span class="line">Value - ICalc - <span class="number">0x4943616c63</span></span><br><span class="line">classAnnotations</span><br><span class="line">TC_NULL - <span class="number">0x70</span></span><br><span class="line">TC_ENDBLOCKDATA - <span class="number">0x78</span></span><br><span class="line">superClassDesc</span><br><span class="line">TC_CLASSDESC - <span class="number">0x72</span></span><br><span class="line">className</span><br><span class="line">Length - <span class="number">23</span> - <span class="number">0x00</span> <span class="number">17</span></span><br><span class="line">Value - java.lang.reflect.Proxy -</span><br><span class="line"><span class="number">0x6a6176612e6c616e672e7265666c6563742e50726f7879</span></span><br><span class="line">serialVersionUID - <span class="number">0xe1</span> <span class="number">27</span> da <span class="number">20</span> cc <span class="number">10</span> <span class="number">43</span> cb</span><br><span class="line">newHandle <span class="number">0x00</span> 7e <span class="number">00</span> <span class="number">01</span></span><br><span class="line">classDescFlags - <span class="number">0x02</span> - SC_SERIALIZABLE</span><br><span class="line">fieldCount - <span class="number">1</span> - <span class="number">0x00</span> <span class="number">01</span></span><br><span class="line">Fields</span><br><span class="line"><span class="number">0</span>:</span><br><span class="line">Object - L - <span class="number">0x4c</span></span><br><span class="line">fieldName</span><br><span class="line">Length - <span class="number">1</span> - <span class="number">0x00</span> <span class="number">01</span></span><br><span class="line">Value - h - <span class="number">0x68</span></span><br><span class="line">className1</span><br><span class="line">TC_STRING - <span class="number">0x74</span></span><br><span class="line">newHandle <span class="number">0x00</span> 7e <span class="number">00</span> <span class="number">02</span></span><br><span class="line">Length - <span class="number">37</span> - <span class="number">0x00</span> <span class="number">25</span></span><br><span class="line">Value - Ljava/lang/reflect/InvocationHandler; -</span><br><span class="line"><span class="number">0x4c6a6176612f6c616e672f7265666c6563742f496e766f636174696f6e48616e646c65723</span></span><br><span class="line">b</span><br><span class="line">classAnnotations</span><br><span class="line">TC_NULL - <span class="number">0x70</span></span><br><span class="line">TC_ENDBLOCKDATA - <span class="number">0x78</span></span><br><span class="line">superClassDesc</span><br><span class="line">TC_NULL - <span class="number">0x70</span></span><br><span class="line">newHandle <span class="number">0x00</span> 7e <span class="number">00</span> <span class="number">03</span></span><br><span class="line">classdata</span><br><span class="line">java.lang.reflect.Proxy</span><br><span class="line">values</span><br><span class="line"><span class="title function_">h</span></span><br><span class="line"><span class="params">(object)</span></span><br><span class="line">TC_OBJECT - <span class="number">0x73</span></span><br><span class="line">TC_CLASSDESC - <span class="number">0x72</span></span><br><span class="line">className</span><br><span class="line">Length - <span class="number">45</span> - <span class="number">0x00</span> <span class="number">2d</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">Value - java.rmi.server.RemoteObjectInvocationHandler -</span><br><span class="line"><span class="number">0x6a6176612e726d692e7365727665722e52656d6f74654f626a656374496e766f636174696</span></span><br><span class="line">f6e48616e646c6572</span><br><span class="line">serialVersionUID - <span class="number">0x00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">02</span></span><br><span class="line">newHandle <span class="number">0x00</span> 7e <span class="number">00</span> <span class="number">04</span></span><br><span class="line">classDescFlags - <span class="number">0x02</span> - SC_SERIALIZABLE</span><br><span class="line">fieldCount - <span class="number">0</span> - <span class="number">0x00</span> <span class="number">00</span></span><br><span class="line">classAnnotations</span><br><span class="line">TC_NULL - <span class="number">0x70</span></span><br><span class="line">TC_ENDBLOCKDATA - <span class="number">0x78</span></span><br><span class="line">superClassDesc</span><br><span class="line">TC_CLASSDESC - <span class="number">0x72</span></span><br><span class="line">className</span><br><span class="line">Length - <span class="number">28</span> - <span class="number">0x00</span> 1c</span><br><span class="line">Value - java.rmi.server.RemoteObject -</span><br><span class="line"><span class="number">0x6a6176612e726d692e7365727665722e52656d6f74654f626a656374</span></span><br><span class="line">serialVersionUID - <span class="number">0xd3</span> <span class="number">61</span> b4 <span class="number">91</span> 0c <span class="number">61</span> <span class="number">33</span> 1e</span><br><span class="line">newHandle <span class="number">0x00</span> 7e <span class="number">00</span> <span class="number">05</span></span><br><span class="line">classDescFlags - <span class="number">0x03</span> - SC_WRITE_METHOD |</span><br><span class="line">SC_SERIALIZABLE</span><br><span class="line">fieldCount - <span class="number">0</span> - <span class="number">0x00</span> <span class="number">00</span></span><br><span class="line">classAnnotations</span><br><span class="line">TC_NULL - <span class="number">0x70</span></span><br><span class="line">TC_ENDBLOCKDATA - <span class="number">0x78</span></span><br><span class="line">superClassDesc</span><br><span class="line">TC_NULL - <span class="number">0x70</span></span><br><span class="line">newHandle <span class="number">0x00</span> 7e <span class="number">00</span> <span class="number">06</span></span><br><span class="line">classdata</span><br><span class="line">java.rmi.server.RemoteObject</span><br><span class="line">values</span><br><span class="line">objectAnnotation</span><br><span class="line">TC_BLOCKDATA - <span class="number">0x77</span></span><br><span class="line">Length - <span class="number">55</span> - <span class="number">0x37</span></span><br><span class="line">Contents -</span><br><span class="line"><span class="number">0x000a556e6963617374526566000e3134302e3233382e33342e3231360000fa00276c05080</span></span><br><span class="line">63e8d45a4462ec50000016d8d8d6357800101</span><br><span class="line">TC_ENDBLOCKDATA - <span class="number">0x78</span></span><br><span class="line">java.rmi.server.RemoteObjectInvocationHandler</span><br><span class="line">values</span><br></pre></td></tr></table></figure>
+
+<p>这是一个 java.lang.reflect.Proxy 对象，其中有一段数据储存在 objectAnnotation 中：</p>
+<p>0x000a556e6963617374526566000e3134302e3233382e33342e3231360000fa00276c0508063e8d45a</p>
+<p>4462ec50000016d8d8d6357800101 ，记录了RMI Server的地址和端口。</p>
+<p>再看RMI Call回来的数据包</p>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20240924210814936.png" alt="image-20240924210814936"></p>
+<p>可以看出我们的 codebase 是通过 [Ljava.rmi.server.ObjID; 的 classAnnotations 传递的。</p>
+<p>所以，即使我们没有RMI的客户端，只需要修改 classAnnotations 的值，就能控制codebase，使其</p>
+<p>指向攻击者的恶意网站。</p>
+<h2 id="classAnnotations（类注释"><a href="#classAnnotations（类注释" class="headerlink" title="classAnnotations（类注释"></a>classAnnotations（类注释</h2><p>众所周知，在序列化Java类的时候用到了一个类，叫 ObjectOutputStream 。这个类内部有一个方法<code>annotateClass </code>，<code> ObjectOutputStream</code> 的子类有需要<code>向序列化后</code>的<code>数据</code>里放任何内容，都可以重写这个方法，写入你自己想要写入的数据。然后反序列化时，就可以读取到这个信息并使用。</p>
+<p>比如，我们RMI的类 MarshalOutputStream 就将当前的 codebase 写入：<a target="_blank" rel="noopener" href="https://github.com/JetBrains/jdk8u_jdk/blob/8db9d62a1cfe07fd4260b83ae86e39f80c0a9ff2/">https://github.com/JetBrains/jdk8u_jdk/blob/8db9d62a1cfe07fd4260b83ae86e39f80c0a9ff2/</a></p>
+<p>src&#x2F;share&#x2F;classes&#x2F;java&#x2F;rmi&#x2F;server&#x2F;RMIClassLoader.java#L657</p>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20240924211301413.png" alt="image-20240924211301413"></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/JetBrains/jdk8u_jdk/blob/8db9d62a1c/src/share/classes/sun/rmi/server/">https://github.com/JetBrains/jdk8u_jdk/blob/8db9d62a1c/src/share/classes/sun/rmi/server/</a></p>
+<p>LoaderHandler.java#L282</p>
+<p>所以，我们在分析序列化数据时看到的 classAnnotations ，实际上就是 annotateClass 方法写入的</p>
+<p>内容。</p>
+<h1 id="Java-序列化流格式详解"><a href="#Java-序列化流格式详解" class="headerlink" title="Java 序列化流格式详解"></a>Java 序列化流格式详解</h1><hr>
+<p>Java 序列化机制允许将对象的状态转换为字节流，以便保存到文件、数据库或通过网络传输。为了实现序列化，Java 定义了一套特定的二进制流格式，称为 <strong>序列化流格式（Serialization Stream Format）</strong>。理解这个格式对于深入理解 Java 序列化机制、调试序列化问题以及防范反序列化漏洞都有重要意义。</p>
+<p>本文将详细解释序列化流格式中的各个组成部分，包括各个标记（Token）和数据结构。</p>
+<hr>
+<h2 id="一、序列化流的整体结构"><a href="#一、序列化流的整体结构" class="headerlink" title="一、序列化流的整体结构"></a>一、序列化流的整体结构</h2><p>序列化流由以下几个主要部分组成：</p>
+<ol>
+<li><strong>Stream Header（流头部）</strong>：标识序列化流的开始，包括魔数和版本号。</li>
+<li><strong>Contents（内容）</strong>：序列化的对象和数据。</li>
+</ol>
+<hr>
+<h3 id="1-Stream-Header（流头部）"><a href="#1-Stream-Header（流头部）" class="headerlink" title="1. Stream Header（流头部）"></a><strong>1. Stream Header（流头部）</strong></h3><ul>
+<li><strong>Magic（魔数）</strong>：前两个字节，固定值 <code>0xAC ED</code>，用于标识这是一个 Java 序列化流。</li>
+<li><strong>Version（版本号）</strong>：接下来的两个字节，通常为 <code>0x00 05</code>，表示序列化流的版本。</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Magic:    0xAC ED</span><br><span class="line">Version:  0x00 05</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="2-Contents（内容）"><a href="#2-Contents（内容）" class="headerlink" title="2. Contents（内容）"></a><strong>2. Contents（内容）</strong></h3><p><strong>Contents</strong> 包含一个或多个 <strong>Content</strong>，每个 <strong>Content</strong> 可以是一个对象、块数据或控制标记。</p>
+<hr>
+<h2 id="二、详细结构解析"><a href="#二、详细结构解析" class="headerlink" title="二、详细结构解析"></a>二、详细结构解析</h2><h3 id="Contents"><a href="#Contents" class="headerlink" title="Contents"></a><strong>Contents</strong></h3><ul>
+<li><strong>Contents</strong> ::&#x3D; <strong>Content</strong> <em>[Contents Content]</em></li>
+</ul>
+<p>也就是说，<strong>Contents</strong> 是由多个 <strong>Content</strong> 组成的序列。</p>
+<h3 id="Content"><a href="#Content" class="headerlink" title="Content"></a><strong>Content</strong></h3><ul>
+<li><strong>Content</strong> ::&#x3D; <strong>Object</strong> | <strong>BlockData</strong></li>
+</ul>
+<p><strong>Content</strong> 可以是一个对象或者块数据。</p>
+<hr>
+<h3 id="Object"><a href="#Object" class="headerlink" title="Object"></a><strong>Object</strong></h3><ul>
+<li><strong>Object</strong> ::&#x3D; <strong>newObject</strong> | <strong>newClass</strong> | <strong>newArray</strong> | <strong>newString</strong> | <strong>newEnum</strong> | <strong>newClassDesc</strong> | <strong>prevObject</strong> | <strong>nullReference</strong> | <strong>exception</strong> | <strong>TC_RESET</strong></li>
+</ul>
+<p><strong>Object</strong> 可以是以下类型之一：</p>
+<ol>
+<li><strong>newObject</strong>：一个新的对象实例。</li>
+<li><strong>newClass</strong>：一个新的类对象。</li>
+<li><strong>newArray</strong>：一个新的数组对象。</li>
+<li><strong>newString</strong>：一个新的字符串对象。</li>
+<li><strong>newEnum</strong>：一个新的枚举对象。</li>
+<li><strong>newClassDesc</strong>：一个新的类描述符。</li>
+<li><strong>prevObject</strong>：对先前对象的引用。</li>
+<li><strong>nullReference</strong>：空引用。</li>
+<li><strong>exception</strong>：异常对象。</li>
+<li><strong>TC_RESET</strong>：重置流上下文。</li>
+</ol>
+<hr>
+<h3 id="BlockData"><a href="#BlockData" class="headerlink" title="BlockData"></a><strong>BlockData</strong></h3><ul>
+<li><strong>BlockData</strong> ::&#x3D; <strong>blockdataShort</strong> | <strong>blockdataLong</strong></li>
+</ul>
+<p><strong>BlockData</strong> 是序列化流中的块数据，可以是短块数据或长块数据。</p>
+<hr>
+<h2 id="三、各个标记和结构详解"><a href="#三、各个标记和结构详解" class="headerlink" title="三、各个标记和结构详解"></a>三、各个标记和结构详解</h2><h3 id="1-Magic（魔数）和-Version（版本号）"><a href="#1-Magic（魔数）和-Version（版本号）" class="headerlink" title="1. Magic（魔数）和 Version（版本号）"></a><strong>1. Magic（魔数）和 Version（版本号）</strong></h3><ul>
+<li><strong>Magic</strong>：<code>0xAC ED</code>（16 进制），表示序列化流的开始。</li>
+<li><strong>Version</strong>：<code>0x00 05</code>，表示序列化协议的版本。</li>
+</ul>
+<h3 id="2-TC-标记"><a href="#2-TC-标记" class="headerlink" title="2. TC_ 标记*"></a><em><em>2. TC_</em> 标记</em>*</h3><p>序列化流使用了一系列的标记（Token），以 <code>TC_</code> 开头，用于标识不同的类型和操作。</p>
+<hr>
+<h3 id="3-Object-类型详解"><a href="#3-Object-类型详解" class="headerlink" title="3. Object 类型详解"></a><strong>3. Object 类型详解</strong></h3><h4 id="1-newObject"><a href="#1-newObject" class="headerlink" title="(1) newObject"></a><strong>(1) newObject</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_OBJECT classDesc newHandle classdata[]</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_OBJECT</strong>：标记，值为 <code>0x73</code>，表示一个新对象的开始。</li>
+<li><strong>classDesc</strong>：类描述符，描述对象的类信息。</li>
+<li><strong>newHandle</strong>：新对象的句柄，用于引用此对象。</li>
+<li>**classdata[]**：对象的数据，包括父类的数据。</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-newClass"><a href="#2-newClass" class="headerlink" title="(2) newClass"></a><strong>(2) newClass</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_CLASS classDesc newHandle</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_CLASS</strong>：标记，值为 <code>0x76</code>，表示一个新类对象。</li>
+<li><strong>classDesc</strong>：类描述符。</li>
+<li><strong>newHandle</strong>：新对象的句柄。</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-newArray"><a href="#3-newArray" class="headerlink" title="(3) newArray"></a><strong>(3) newArray</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_ARRAY classDesc newHandle (int)length values[]</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_ARRAY</strong>：标记，值为 <code>0x75</code>，表示一个新数组对象。</li>
+<li><strong>classDesc</strong>：数组的类描述符。</li>
+<li><strong>newHandle</strong>：新对象的句柄。</li>
+<li><strong>length</strong>：数组长度。</li>
+<li>**values[]**：数组元素。</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-newString"><a href="#4-newString" class="headerlink" title="(4) newString"></a><strong>(4) newString</strong></h4><ul>
+<li><strong>语法</strong>：<ul>
+<li><strong>短字符串</strong>：<code>TC_STRING newHandle (utf)</code><ul>
+<li><strong>TC_STRING</strong>：标记，值为 <code>0x74</code>。</li>
+<li>**(utf)**：使用 UTF-8 编码的字符串。</li>
+</ul>
+</li>
+<li><strong>长字符串</strong>：<code>TC_LONGSTRING newHandle (long-utf)</code><ul>
+<li><strong>TC_LONGSTRING</strong>：标记，值为 <code>0x7C</code>。</li>
+<li>**(long-utf)**：使用长 UTF-8 编码的字符串。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="5-newEnum"><a href="#5-newEnum" class="headerlink" title="(5) newEnum"></a><strong>(5) newEnum</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_ENUM classDesc newHandle enumConstantName</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_ENUM</strong>：标记，值为 <code>0x7E</code>，表示一个新的枚举对象。</li>
+<li><strong>enumConstantName</strong>：枚举常量的名称。</li>
+</ul>
+</li>
+</ul>
+<h4 id="6-newClassDesc"><a href="#6-newClassDesc" class="headerlink" title="(6) newClassDesc"></a><strong>(6) newClassDesc</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_CLASSDESC className serialVersionUID newHandle classDescInfo</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_CLASSDESC</strong>：标记，值为 <code>0x72</code>，表示一个新的类描述符。</li>
+<li><strong>className</strong>：类的完全限定名。</li>
+<li><strong>serialVersionUID</strong>：类的序列化版本号。</li>
+<li><strong>classDescInfo</strong>：类描述符信息。</li>
+</ul>
+</li>
+</ul>
+<h4 id="7-prevObject"><a href="#7-prevObject" class="headerlink" title="(7) prevObject"></a><strong>(7) prevObject</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_REFERENCE (int)handle</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_REFERENCE</strong>：标记，值为 <code>0x71</code>，表示对先前对象的引用。</li>
+<li><strong>handle</strong>：先前对象的句柄。</li>
+</ul>
+</li>
+</ul>
+<h4 id="8-nullReference"><a href="#8-nullReference" class="headerlink" title="(8) nullReference"></a><strong>(8) nullReference</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_NULL</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_NULL</strong>：标记，值为 <code>0x70</code>，表示一个空引用。</li>
+</ul>
+</li>
+</ul>
+<h4 id="9-exception"><a href="#9-exception" class="headerlink" title="(9) exception"></a><strong>(9) exception</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_EXCEPTION exceptionObject</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_EXCEPTION</strong>：标记，值为 <code>0x7D</code>，表示一个异常对象。</li>
+<li><strong>exceptionObject</strong>：异常对象的序列化数据。</li>
+</ul>
+</li>
+</ul>
+<h4 id="10-TC-RESET"><a href="#10-TC-RESET" class="headerlink" title="(10) TC_RESET"></a><strong>(10) TC_RESET</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_RESET</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_RESET</strong>：标记，值为 <code>0x79</code>，表示重置流上下文。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="4-BlockData-类型详解"><a href="#4-BlockData-类型详解" class="headerlink" title="4. BlockData 类型详解"></a><strong>4. BlockData 类型详解</strong></h3><h4 id="1-blockdataShort"><a href="#1-blockdataShort" class="headerlink" title="(1) blockdataShort"></a><strong>(1) blockdataShort</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_BLOCKDATA (unsigned byte)size (byte)[size]</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_BLOCKDATA</strong>：标记，值为 <code>0x77</code>，表示块数据的开始。</li>
+<li><strong>size</strong>：后续数据的长度，范围为 0 到 255。</li>
+<li>**(byte)[size]**：实际的数据字节。</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-blockdataLong"><a href="#2-blockdataLong" class="headerlink" title="(2) blockdataLong"></a><strong>(2) blockdataLong</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_BLOCKDATALONG (int)size (byte)[size]</code></li>
+<li><strong>解释</strong>：<ul>
+<li><strong>TC_BLOCKDATALONG</strong>：标记，值为 <code>0x7A</code>，用于长度超过 255 的块数据。</li>
+<li><strong>size</strong>：后续数据的长度，范围为 0 到 2^32-1。</li>
+<li>**(byte)[size]**：实际的数据字节。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="四、序列化过程中的句柄（Handle）"><a href="#四、序列化过程中的句柄（Handle）" class="headerlink" title="四、序列化过程中的句柄（Handle）"></a>四、序列化过程中的句柄（Handle）</h2><p>在序列化过程中，每个新创建的对象都会分配一个句柄，用于引用该对象。这有助于处理对象共享和循环引用。</p>
+<ul>
+<li><strong>句柄值的起始值</strong>：<code>0x7E0000</code></li>
+<li><strong>句柄值</strong>：每创建一个新对象，句柄值递增。</li>
+</ul>
+<hr>
+<h2 id="五、标记（Token）及其对应的十六进制值"><a href="#五、标记（Token）及其对应的十六进制值" class="headerlink" title="五、标记（Token）及其对应的十六进制值"></a>五、标记（Token）及其对应的十六进制值</h2><table>
+<thead>
+<tr>
+<th>标记名</th>
+<th>值（十六进制）</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>TC_NULL</strong></td>
+<td><code>0x70</code></td>
+<td>空引用</td>
+</tr>
+<tr>
+<td><strong>TC_REFERENCE</strong></td>
+<td><code>0x71</code></td>
+<td>对先前对象的引用</td>
+</tr>
+<tr>
+<td><strong>TC_CLASSDESC</strong></td>
+<td><code>0x72</code></td>
+<td>类描述符</td>
+</tr>
+<tr>
+<td><strong>TC_OBJECT</strong></td>
+<td><code>0x73</code></td>
+<td>新对象</td>
+</tr>
+<tr>
+<td><strong>TC_STRING</strong></td>
+<td><code>0x74</code></td>
+<td>新字符串（短字符串）</td>
+</tr>
+<tr>
+<td><strong>TC_ARRAY</strong></td>
+<td><code>0x75</code></td>
+<td>新数组</td>
+</tr>
+<tr>
+<td><strong>TC_CLASS</strong></td>
+<td><code>0x76</code></td>
+<td>新类对象</td>
+</tr>
+<tr>
+<td><strong>TC_BLOCKDATA</strong></td>
+<td><code>0x77</code></td>
+<td>块数据（短）</td>
+</tr>
+<tr>
+<td><strong>TC_ENDBLOCKDATA</strong></td>
+<td><code>0x78</code></td>
+<td>块数据结束</td>
+</tr>
+<tr>
+<td><strong>TC_RESET</strong></td>
+<td><code>0x79</code></td>
+<td>重置流上下文</td>
+</tr>
+<tr>
+<td><strong>TC_BLOCKDATALONG</strong></td>
+<td><code>0x7A</code></td>
+<td>块数据（长）</td>
+</tr>
+<tr>
+<td><strong>TC_EXCEPTION</strong></td>
+<td><code>0x7D</code></td>
+<td>异常对象</td>
+</tr>
+<tr>
+<td><strong>TC_LONGSTRING</strong></td>
+<td><code>0x7C</code></td>
+<td>新字符串（长字符串）</td>
+</tr>
+<tr>
+<td><strong>TC_PROXYCLASSDESC</strong></td>
+<td><code>0x7D</code></td>
+<td>代理类描述符</td>
+</tr>
+<tr>
+<td><strong>TC_ENUM</strong></td>
+<td><code>0x7E</code></td>
+<td>新枚举对象</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="六、具体示例解析"><a href="#六、具体示例解析" class="headerlink" title="六、具体示例解析"></a>六、具体示例解析</h2><h3 id="1-序列化一个字符串"><a href="#1-序列化一个字符串" class="headerlink" title="1. 序列化一个字符串"></a><strong>1. 序列化一个字符串</strong></h3><p>当序列化一个字符串时，可能会使用 <code>TC_STRING</code> 或 <code>TC_LONGSTRING</code>，取决于字符串的长度。</p>
+<h4 id="1-短字符串"><a href="#1-短字符串" class="headerlink" title="(1) 短字符串"></a><strong>(1) 短字符串</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_STRING newHandle (utf)</code></li>
+<li><strong>步骤</strong>：<ol>
+<li><strong>TC_STRING</strong>：<code>0x74</code></li>
+<li><strong>newHandle</strong>：为字符串分配的新句柄。</li>
+<li>**(utf)**：字符串的 UTF-8 编码。</li>
+</ol>
+</li>
+</ul>
+<h4 id="2-长字符串"><a href="#2-长字符串" class="headerlink" title="(2) 长字符串"></a><strong>(2) 长字符串</strong></h4><ul>
+<li><strong>语法</strong>：<code>TC_LONGSTRING newHandle (long-utf)</code></li>
+<li><strong>步骤</strong>：<ol>
+<li><strong>TC_LONGSTRING</strong>：<code>0x7C</code></li>
+<li><strong>newHandle</strong>：为字符串分配的新句柄。</li>
+<li>**(long-utf)**：字符串的长 UTF-8 编码。</li>
+</ol>
+</li>
+</ul>
+<p><strong>注意</strong>：当字符串长度超过 65535 个字节时，需要使用 <code>TC_LONGSTRING</code>。</p>
+<h3 id="2-序列化一个新对象"><a href="#2-序列化一个新对象" class="headerlink" title="2. 序列化一个新对象"></a><strong>2. 序列化一个新对象</strong></h3><ul>
+<li><strong>语法</strong>：<code>TC_OBJECT classDesc newHandle classdata[]</code></li>
+<li><strong>步骤</strong>：<ol>
+<li><strong>TC_OBJECT</strong>：<code>0x73</code></li>
+<li><strong>classDesc</strong>：类的描述符，包括类名、序列化版本 UID、字段信息等。</li>
+<li><strong>newHandle</strong>：为对象分配的新句柄。</li>
+<li>**classdata[]**：对象的实际数据，根据类的字段顺序写入。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h2 id="七、序列化流中的异常处理"><a href="#七、序列化流中的异常处理" class="headerlink" title="七、序列化流中的异常处理"></a>七、序列化流中的异常处理</h2><h3 id="1-exception"><a href="#1-exception" class="headerlink" title="1. exception"></a><strong>1. exception</strong></h3><ul>
+<li><strong>语法</strong>：<code>TC_EXCEPTION exceptionObject</code></li>
+<li><strong>解释</strong>：<ul>
+<li>当序列化过程中发生异常时，可以使用 <code>TC_EXCEPTION</code> 标记，后跟异常对象的序列化数据。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-TC-RESET"><a href="#2-TC-RESET" class="headerlink" title="2. TC_RESET"></a><strong>2. TC_RESET</strong></h3><ul>
+<li><strong>语法</strong>：<code>TC_RESET</code></li>
+<li><strong>解释</strong>：<ul>
+<li><code>TC_RESET</code> 用于重置序列化流的上下文，包括清除对象句柄表。这在需要重新开始对象引用计数时非常有用。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="八、特殊标记的作用"><a href="#八、特殊标记的作用" class="headerlink" title="八、特殊标记的作用"></a>八、特殊标记的作用</h2><h3 id="1-TC-ENDBLOCKDATA"><a href="#1-TC-ENDBLOCKDATA" class="headerlink" title="1. TC_ENDBLOCKDATA"></a><strong>1. TC_ENDBLOCKDATA</strong></h3><ul>
+<li><strong>值</strong>：<code>0x78</code></li>
+<li><strong>作用</strong>：标记块数据的结束。在读取对象数据时，如果遇到 <code>TC_ENDBLOCKDATA</code>，表示当前块数据或对象的结束。</li>
+</ul>
+<h3 id="2-TC-PROXYCLASSDESC"><a href="#2-TC-PROXYCLASSDESC" class="headerlink" title="2. TC_PROXYCLASSDESC"></a><strong>2. TC_PROXYCLASSDESC</strong></h3><ul>
+<li><strong>值</strong>：<code>0x7D</code></li>
+<li><strong>作用</strong>：表示一个代理类描述符，用于序列化实现了 <code>java.lang.reflect.Proxy</code> 的动态代理类。</li>
+</ul>
+<hr>
+<h2 id="九、序列化类描述符（ClassDesc）"><a href="#九、序列化类描述符（ClassDesc）" class="headerlink" title="九、序列化类描述符（ClassDesc）"></a>九、序列化类描述符（ClassDesc）</h2><p>在序列化对象时，需要先序列化其类描述符，包含以下信息：</p>
+<ol>
+<li><strong>类名（className）</strong>：以 UTF-8 编码的完全限定类名。</li>
+<li><strong>序列化版本 UID（serialVersionUID）</strong>：用于版本控制的长整型值。</li>
+<li><strong>类描述符信息（classDescInfo）</strong>：<ul>
+<li><strong>类标志（classFlags）</strong>：指示类的序列化特性，如是否有 <code>writeObject</code> 方法。</li>
+<li><strong>字段描述符（fieldDesc[]）</strong>：类的字段信息。</li>
+<li><strong>方法数据</strong>：可选，包括 <code>writeObject</code> 和 <code>readObject</code> 方法的数据。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="十、反序列化时的注意事项"><a href="#十、反序列化时的注意事项" class="headerlink" title="十、反序列化时的注意事项"></a>十、反序列化时的注意事项</h2><ol>
+<li><p><strong>句柄引用</strong>：在反序列化过程中，需要维护对象句柄表，以正确处理对象引用和共享。</p>
+</li>
+<li><p><strong>类的加载</strong>：反序列化时，JVM 会尝试加载对应的类。如果类不存在，或版本不匹配，可能会导致异常。</p>
+</li>
+<li><p><strong>安全风险</strong>：反序列化不可信数据可能导致安全漏洞，如反序列化漏洞。因此，反序列化时应确保数据的可信性。</p>
+</li>
+</ol>
+<hr>
+<h2 id="十二、参考资料"><a href="#十二、参考资料" class="headerlink" title="十二、参考资料"></a>十二、参考资料</h2><ul>
+<li>官方文档：<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/platform/serialization/spec/serialTOC.html">Java 序列化规范</a></li>
+</ul>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/RCE/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">RCE函数和命令</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/Phar%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">Phar反序列化漏洞详解</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

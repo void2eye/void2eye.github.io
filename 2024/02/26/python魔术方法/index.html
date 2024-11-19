@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>Python魔术方法 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="Python魔术方法 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/python%E9%AD%94%E6%9C%AF%E6%96%B9%E6%B3%95/index.html" />
+  
+  <meta property="og:image" content="/img/ye3.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/python/">python</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">Python魔术方法</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="基本魔术方法"><a href="#基本魔术方法" class="headerlink" title="基本魔术方法"></a>基本魔术方法</h1><ol>
+<li><p>**<code>__init__</code>**：对象初始化方法，在创建对象时调用。通常用来初始化对象的属性。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __init__(self, value):</span><br><span class="line">        self.value = value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__repr__</code>**：返回对象的“官方”字符串表示形式。通常可以通过调用 <code>repr(object)</code> 来查看。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __repr__(self):</span><br><span class="line">        return f&quot;Example(value=&#123;self.value&#125;)&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__str__</code>**：返回对象的“非正式”或友好字符串表示形式。通常可以通过调用 <code>str(object)</code> 或 <code>print(object)</code> 来查看。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __str__(self):</span><br><span class="line">        return f&quot;Example with value &#123;self.value&#125;&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__len__</code>**：返回对象的长度。常用于实现自定义容器类。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Container:</span><br><span class="line">    def __len__(self):</span><br><span class="line">        return len(self.items)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__getitem__</code>**：获取对象中指定键的值。通常用于实现自定义的索引操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Container:</span><br><span class="line">    def __getitem__(self, key):</span><br><span class="line">        return self.items[key]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__setitem__</code>**：设置对象中指定键的值。常用于实现可变容器。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Container:</span><br><span class="line">    def __setitem__(self, key, value):</span><br><span class="line">        self.items[key] = value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__delitem__</code>**：删除对象中指定键的值。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Container:</span><br><span class="line">    def __delitem__(self, key):</span><br><span class="line">        del self.items[key]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__iter__</code>**：返回一个迭代器对象。通常用于实现可迭代对象。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Container:</span><br><span class="line">    def __iter__(self):</span><br><span class="line">        return iter(self.items)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__contains__</code>**：检查对象是否包含指定的元素。通常用于 <code>in</code> 操作符。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Container:</span><br><span class="line">    def __contains__(self, item):</span><br><span class="line">        return item in self.items</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__call__</code>**：使实例对象可以像函数一样被调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __call__(self, value):</span><br><span class="line">        self.value = value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__base__</code>**：返回当前类的基类。如 <code>SomeClass.__base__</code> 会返回 <code>&lt;class &#39;object&#39;&gt;</code>。</p>
+</li>
+<li><p>**<code>__subclasses__()</code>**：查看当前类的子类组成的列表。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Example.__subclasses__()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__builtins__</code>**：以一个集合的形式查看其引用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import builtins</span><br><span class="line">dir(builtins)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__getattr__</code><strong>、</strong><code>__setattr__</code><strong>、</strong><code>__delattr__</code>**：处理对象属性的获取、设置和删除。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __getattr__(self, name):</span><br><span class="line">        return f&quot;&#123;name&#125; not found&quot;</span><br><span class="line"></span><br><span class="line">    def __setattr__(self, name, value):</span><br><span class="line">        self.__dict__[name] = value</span><br><span class="line"></span><br><span class="line">    def __delattr__(self, name):</span><br><span class="line">        del self.__dict__[name]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__enter__</code><strong>、</strong><code>__exit__</code>**：定义在使用 <code>with</code> 语句时对象的上下文管理行为。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __enter__(self):</span><br><span class="line">        # Setup code</span><br><span class="line">        return self</span><br><span class="line"></span><br><span class="line">    def __exit__(self, exc_type, exc_val, exc_tb):</span><br><span class="line">        # Teardown code</span><br><span class="line">        pass</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__class__</code>**：指向对象的类。可以用来获取对象的类信息。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">obj = Example()</span><br><span class="line">print(obj.__class__)  # &lt;class &#x27;__main__.Example&#x27;&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__delattr__</code>**：当试图删除对象的属性时调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __delattr__(self, name):</span><br><span class="line">        print(f&quot;Deleting attribute &#123;name&#125;&quot;)</span><br><span class="line">        super().__delattr__(name)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__dict__</code>**：包含对象（但不包括从类继承的属性）的属性字典。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">obj = Example()</span><br><span class="line">print(obj.__dict__)  # &#123;&#x27;attribute&#x27;: value&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__dir__</code>**：由 <code>dir()</code> 函数调用，用于列出对象的属性和方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __dir__(self):</span><br><span class="line">        return [&#x27;custom_attribute&#x27;, &#x27;another_attribute&#x27;]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__doc__</code>**：类或方法的文档字符串。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    &quot;&quot;&quot;This is a docstring.&quot;&quot;&quot;</span><br><span class="line">print(Example.__doc__)  # &quot;This is a docstring.&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__eq__</code>**：实现对象的相等性比较，通常由 <code>==</code> 操作符调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __eq__(self, other):</span><br><span class="line">        return self.value == other.value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__format__</code>**：用于实现自定义的字符串格式化。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __format__(self, format_spec):</span><br><span class="line">        return f&quot;Formatted value: &#123;self.value:&#123;format_spec&#125;&#125;&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__ge__</code>**：实现对象的“大于等于”比较，通常由 <code>&gt;=</code> 操作符调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __ge__(self, other):</span><br><span class="line">        return self.value &gt;= other.value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__getattribute__</code>**：在访问对象属性时调用，优先于 <code>__getattr__</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __getattribute__(self, name):</span><br><span class="line">        print(f&quot;Accessing attribute &#123;name&#125;&quot;)</span><br><span class="line">        return super().__getattribute__(name)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__getstate__</code>**：用于对象序列化时返回要保存的状态。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __getstate__(self):</span><br><span class="line">        state = self.__dict__.copy()</span><br><span class="line">        return state</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__gt__</code>**：实现对象的“大于”比较，通常由 <code>&gt;</code> 操作符调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __gt__(self, other):</span><br><span class="line">        return self.value &gt; other.value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__hash__</code>**：实现对象的哈希值计算，通常由 <code>hash()</code> 函数调用。对象的哈希值应保持不变。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __hash__(self):</span><br><span class="line">        return hash(self.value)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__init_subclass__</code>**：在子类化时调用，可以用来自定义子类的行为。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Base:</span><br><span class="line">    def __init_subclass__(cls, **kwargs):</span><br><span class="line">        super().__init_subclass__(**kwargs)</span><br><span class="line">        cls.custom_attribute = True</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__le__</code>**：实现对象的“小于等于”比较，通常由 <code>&lt;=</code> 操作符调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __le__(self, other):</span><br><span class="line">        return self.value &lt;= other.value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__lt__</code>**：实现对象的“小于”比较，通常由 <code>&lt;</code> 操作符调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __lt__(self, other):</span><br><span class="line">        return self.value &lt; other.value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__module__</code>**：指向定义类的模块名称。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    pass</span><br><span class="line">print(Example.__module__)  # __main__</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__ne__</code>**：实现对象的不等性比较，通常由 <code>!=</code> 操作符调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __ne__(self, other):</span><br><span class="line">        return self.value != other.value</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__new__</code>**：创建并返回一个新对象实例，通常在对象实例化时调用，优先于 <code>__init__</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __new__(cls, *args, **kwargs):</span><br><span class="line">        instance = super().__new__(cls)</span><br><span class="line">        return instance</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__reduce__</code>**：用于定义对象序列化的行为，返回一个元组来帮助对象序列化。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __reduce__(self):</span><br><span class="line">        return (self.__class__, (self.value,))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__reduce_ex__</code>**：与 <code>__reduce__</code> 类似，但可以支持更多的协议版本。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __reduce_ex__(self, protocol):</span><br><span class="line">        return (self.__class__, (self.value,))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__repr__</code>**：返回对象的“官方”字符串表示形式。通常可以通过调用 <code>repr(object)</code> 来查看。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __repr__(self):</span><br><span class="line">        return f&quot;Example(value=&#123;self.value&#125;)&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__setattr__</code>**：当试图设置对象的属性时调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __setattr__(self, name, value):</span><br><span class="line">        print(f&quot;Setting attribute &#123;name&#125; to &#123;value&#125;&quot;)</span><br><span class="line">        super().__setattr__(name, value)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__sizeof__</code>**：返回对象占用的内存大小，通常由 <code>sys.getsizeof()</code> 调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class Example:</span><br><span class="line">    def __sizeof__(self):</span><br><span class="line">        return object.__sizeof__(self) + sum(sys.getsizeof(v) for v in self.__dict__.values</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__subclasshook__</code>**：自定义类的子类检测逻辑。通常由 <code>issubclass()</code> 调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class Base:</span><br><span class="line">    @classmethod</span><br><span class="line">    def __subclasshook__(cls, subclass):</span><br><span class="line">        return hasattr(subclass, &#x27;custom_method&#x27;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>**<code>__weakref__</code>**：用于支持弱引用，如果类中没有 <code>__slots__</code> 属性，则对象的弱引用字典会自动包含此属性。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">import weakref</span><br><span class="line"></span><br><span class="line">class Example:</span><br><span class="line">    pass</span><br><span class="line"></span><br><span class="line">obj = Example()</span><br><span class="line">r = weakref.ref(obj)</span><br><span class="line">print(r)  # &lt;weakref at 0x...; to &#x27;Example&#x27; at 0x...&gt;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h1 id="常用"><a href="#常用" class="headerlink" title="常用"></a>常用</h1><p><code>__doc__</code>:查看默认类的帮助</p>
+<p><code>dir()</code>查看类的所有<code>属性</code>和<code>方法</code></p>
+<p><code>chr</code>,<code>ord</code>ASCII码和字符的转换。</p>
+<p><code>globals</code>:返回全局变量的函数</p>
+<p><code>locals</code>:返回所有局部变量</p>
+<p><code>__import__</code>:import os 等价于 os &#x3D; __import__(‘os’)</p>
+<p><code>__file__</code>:当前运行代码所在路径</p>
+<p><code>_</code>:该变量返回上一次运行的python语句结果，但仅仅会在运行<code>交互式终端</code>时产生，运行代码文件是不会有此变量。</p>
+<h1 id=""><a href="#" class="headerlink" title=""></a></h1>
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/pyjail/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">pyjail</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/py%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">Python原型链污染</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>

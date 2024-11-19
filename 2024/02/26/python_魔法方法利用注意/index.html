@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head prefix="og: https://ogp.me/ns#">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>Python 魔法方法利用注意 - 天下同春</title>
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    <link rel='manifest' href='/manifest.json'>
+  
+
+  
+  
+  
+  <meta property="og:title" content="Python 魔法方法利用注意 - 天下同春" />
+  
+  <meta property="og:type" content="article" />
+  
+  <meta property="og:url" content="http://example.com/2024/02/26/python_%E9%AD%94%E6%B3%95%E6%96%B9%E6%B3%95%E5%88%A9%E7%94%A8%E6%B3%A8%E6%84%8F/index.html" />
+  
+  <meta property="og:image" content="/img/ye6.jpg" />
+  
+  <meta property="og:article:published_time" content="2024-02-26T11:00:08.000Z" />
+  
+  <meta property="og:article:author" content="void2eye" />
+  
+  
+
+  
+<link rel="stylesheet" href="/css/var.css">
+
+  
+<link rel="stylesheet" href="/css/main.css">
+
+  
+<link rel="stylesheet" href="/css/typography.css">
+
+  
+<link rel="stylesheet" href="/css/code-highlighting.css">
+
+  
+<link rel="stylesheet" href="/css/components.css">
+
+  
+<link rel="stylesheet" href="/css/nav.css">
+
+  
+<link rel="stylesheet" href="/css/paginator.css">
+
+  
+<link rel="stylesheet" href="/css/footer.css">
+
+  
+<link rel="stylesheet" href="/css/post-list.css">
+
+  
+  
+<link rel="stylesheet" href="/css/rainbow-banner.css">
+
+  
+  
+  
+<link rel="stylesheet" href="/css/toc.css">
+
+  
+  
+  
+  
+  
+<link rel="stylesheet" href="/css/post.css">
+
+  
+  
+  
+  
+  
+
+  
+    <script src='https://unpkg.com/@waline/client@v2/dist/waline.js'></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@waline/client@v2/dist/waline.css"
+    />
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+    <body
+        data-color-scheme="auto"
+        data-uppercase-categories="true"
+        
+        data-rainbow-banner="true"
+        data-rainbow-banner-shown="auto"
+        data-rainbow-banner-month="6"
+        data-rainbow-banner-colors="#e50000,#ff8d00,#ffee00,#008121,#004cff,#760188"
+        
+        data-config-root="/"
+        
+        data-toc="true"
+        data-toc-max-depth="2"
+        
+        
+    >
+        <nav id="theme-nav">
+    <div class="inner">
+        <a class="title" href="/">天下同春</a>
+        <div class="nav-arrow"></div>
+        <div class="nav-items">
+            <a class="nav-item nav-item-home" href="/">Home</a>
+            
+            
+            <a class="nav-item" href="/">Home</a>
+            
+            
+            
+            <a class="nav-item" href="/archives">Archives</a>
+            
+            
+            
+            <a class="nav-item" href="/friends">Friends</a>
+            
+            
+            
+            <a class="nav-item nav-item-github nav-item-icon" href="https://github.com/void2eye" target="_blank" aria-label="GitHub">&nbsp;</a>
+            
+            
+            
+            <a class="nav-item nav-item-search nav-item-icon" href="/search" target="_blank" aria-label="Search">&nbsp;</a>
+            
+            
+        </div>
+    </div>
+</nav>
+        
+<article class="post">
+    <div class="meta">
+        
+        <div class="categories text-uppercase">
+        
+            <a href="/categories/Web/">Web</a>
+        
+            <a href="/categories/Web/python/">python</a>
+        
+        </div>
+        
+
+        
+        <div class="date" id="date">
+            <span>February</span>
+            <span>26,</span>
+            <span>2024</span>
+        </div>
+        
+
+        <h1 class="title">Python 魔法方法利用注意</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="content">
+        <h1 id="我们先看一个报错"><a href="#我们先看一个报错" class="headerlink" title="我们先看一个报错"></a>我们先看一个报错</h1><p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20241022173651605.png" alt="image-20241022173651605"></p>
+<p>在 Python 中，<code>__init__</code> 方法属于类的实例方法，但它本质上是通过 <code>method-wrapper</code> 或 <code>wrapper_descriptor</code> 实现的特殊方法，而不是常规的函数对象。这就是为什么在访问 <code>__init__</code> 的时候会看到 <code>method-wrapper</code>，并且无法访问像 <code>__globals__</code> 这样的属性。</p>
+<p><strong><code>__init__</code> 是一个特殊方法</strong>： <code>__init__</code> 是类的构造函数（初始化方法），它是一个绑定方法，调用时由 Python 自动处理。这种特殊的绑定方法不像普通的函数或方法那样包含 <code>__globals__</code> 属性，因为它是通过内部机制实现的，而不是像常规函数那样存在于全局命名空间。</p>
+<p>**绑定方法和 <code>method-wrapper</code>**： 通过 <code>obj.__init__</code> 访问 <code>__init__</code> 实际上返回的是一个绑定到对象的 <code>method-wrapper</code>，它是 Python 的一种优化机制，用于类的魔法方法。<code>method-wrapper</code> 并不暴露 <code>__globals__</code> 属性，因为它与普通函数不同，不能直接通过 <code>globals()</code> 访问其全局变量。</p>
+<p><strong><code>__globals__</code> 仅适用于函数对象</strong>： 只有普通的函数对象（如通过 <code>def</code> 定义的函数）才会有 <code>__globals__</code> 属性，表示它们所在的全局命名空间。Python 的内建方法（如 <code>__init__</code>）是用 <code>C</code> 实现的，属于特殊的 <code>method-wrapper</code>，因此不具备 <code>__globals__</code> 属性。</p>
+<blockquote>
+<p>重点在第三点，能够有globals属性的必须是def定义的函数（lambda也可以</p>
+</blockquote>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20241022174223178.png" alt="image-20241022174223178"></p>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20241022174511612.png" alt="image-20241022174511612"></p>
+<p>很清晰了，函数能直接访问他<code>所在模块</code>的所有变量和属性，你看test3已经访问到了之前定义的匿名函数。</p>
+<blockquote>
+<p>所以我们的目的一般都是通过访问类或者<code>类</code>的<code>实例</code>来访问函数的globals属性</p>
+</blockquote>
+<p><img src="https://sl0wjamz.oss-cn-hangzhou.aliyuncs.com/img/image-20241022174549243.png" alt="image-20241022174549243"></p>
+<ul>
+<li>注意跳板为实例的时候，必须得访问__class__来访问到他的类。</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>Python 的内置魔法方法（如 <code>__init__</code>）是特殊的绑定方法（<code>method-wrapper</code>），不具备 <code>__globals__</code> 属性。</p>
+<p>只有通过 <code>def</code> 定义的普通函数和方法才具有 <code>__globals__</code> 属性，表示它们的全局命名空间。</p>
+<p>要访问 <code>__globals__</code>，请确保操作的对象是常规的函数或方法对象，而不是内建的魔法方法。</p>
+
+    </div>
+
+    
+    <div class="about">
+        <h1>About this Post</h1>
+        <div class="details">
+            <p>This post is written by void2eye, licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc/4.0">CC BY-NC 4.0</a>.</p>
+        </div>
+        
+        <p class="tags">
+            
+            <i class="icon"></i>
+            <a href="/tags/Web/" class="tag">#Web</a>
+        </p>
+        
+    </div>
+    
+
+    <div class="container post-prev-next">
+        
+        <a href="/2024/02/26/pickle%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="next">
+            <div>
+                <div class="text">
+                    <p class="label">Next</p>
+                    <h3 class="title">pickle反序列化</h3>
+                </div>
+            </div>
+        </a>
+        
+        
+        <a href="/2024/02/26/pyjail/" class="prev">
+            <div>
+                <div class="text">
+                    <p class="label">Previous</p>
+                    <h3 class="title">pyjail</>
+                </div>
+            </div>
+        </a>
+        
+    </div>
+
+    
+        
+        <div class="container">
+            <div id="waline"></div>
+            <script>
+                new Waline({
+                    el: "#waline",
+                    
+                    path: location.pathname,
+                    
+                    serverURL: https://blogcomment-blond.vercel.app/,
+                    
+                    requiredMeta: ['nick'],
+                    
+                });
+            </script>
+        </div>
+        
+        
+    
+</article>
+
+        <footer>
+    <div class="inner">
+        <div class="links">
+            
+            <div class="group">
+                <h2 class="title">Blog</h2>
+                
+                <a href="/" class="item">Blog</a>
+                
+                <a href="/archives" class="item">Archives</a>
+                
+                <a href="/search" class="item">Search</a>
+                
+                <a href="/friends" class="item">Friends</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Projects</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/void2eye/Registration-tool-automatic-submission-script" class="item">RE_tools</a>
+                
+            </div>
+            
+            <div class="group">
+                <h2 class="title">Me</h2>
+                
+                <a target="_blank" rel="noopener" href="https://github.com/MrWillCom" class="item">GitHub</a>
+                
+                <a href="mailto:2110027730@qq.com" class="item">Email</a>
+                
+            </div>
+            
+        </div>
+        <span>&copy; 2024 void2eye<br>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> </span>
+        
+        <br>
+        <span class="footer-extra-description"><a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024135394号</a></span>
+        
+        
+            <br>
+            <div class="color-scheme-toggle" role="radiogroup" id="theme-color-scheme-toggle">
+                <label>
+                    <input type="radio" value="light">
+                    <span>Light</span>
+                </label>
+                <label>
+                    <input type="radio" value="dark">
+                    <span>Dark</span>
+                </label>
+                <label>
+                    <input type="radio" value="auto">
+                    <span>Auto</span>
+                </label>
+            </div>
+        
+    </div>
+</footer>
+
+
+        
+<script src="/js/main.js"></script>
+
+        
+        
+        
+
+        
+        <script src="https://unpkg.com/scrollreveal"></script>
+        <script>
+            window.addEventListener('load', () => {
+                ScrollReveal({ delay: 250, reset: true, easing: 'cubic-bezier(0, 0, 0, 1)' })
+                ScrollReveal().reveal('.post-list-item .cover-img img')
+                ScrollReveal().reveal('.post-list-item, .card, .content p img, .content .block-large img', { distance: '60px', origin: 'bottom', duration: 800 })
+            })
+        </script>
+        
+    </body>
+</html>
